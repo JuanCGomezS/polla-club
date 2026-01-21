@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { registerUser, loginUser } from '../../lib/auth';
+import { getRoute } from '../../lib/utils';
 
 export default function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +19,7 @@ export default function LoginForm() {
     try {
       if (isLogin) {
         await loginUser(email, password);
-        window.location.href = '/groups';
+        window.location.href = getRoute('/groups');
       } else {
         if (!displayName.trim()) {
           setError('El nombre es requerido');
@@ -26,7 +27,7 @@ export default function LoginForm() {
           return;
         }
         await registerUser(email, password, displayName);
-        window.location.href = '/groups';
+        window.location.href = getRoute('/groups');
       }
     } catch (err: any) {
       setError(err.message || 'Error al procesar la solicitud');

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChange, logoutUser, getUserData } from '../../lib/auth';
+import { getRoute } from '../../lib/utils';
 import type { User } from 'firebase/auth';
 import type { User as UserType } from '../../lib/types';
 
@@ -40,7 +41,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      window.location.href = '/';
+      window.location.href = getRoute('/');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -52,7 +53,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <a href="/" className="text-xl font-bold text-gray-900">
+              <a href={getRoute('/')} className="text-xl font-bold text-gray-900">
                 PollaClub
               </a>
             </div>
@@ -69,13 +70,13 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <a href="/" className="text-xl font-bold text-gray-900">
+              <a href={getRoute('/')} className="text-xl font-bold text-gray-900">
                 PollaClub
               </a>
             </div>
             <div>
               <a
-                href="/login"
+                href={getRoute('/login')}
                 className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Iniciar Sesión
@@ -92,7 +93,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <a href="/groups" className="text-xl font-bold text-gray-900">
+            <a href={getRoute('/groups')} className="text-xl font-bold text-gray-900">
               PollaClub
             </a>
           </div>
