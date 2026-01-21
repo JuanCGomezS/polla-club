@@ -1,16 +1,30 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="PollaClub - Sistema de Pronósticos Deportivos" showHeader={true}>
+  <main class="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div class="text-center">
+      <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        PollaClub
+      </h1>
+      <p class="text-xl text-gray-600 mb-8">
+        Sistema de pronósticos deportivos entre amigos
+      </p>
+      <!-- <div class="space-x-4">
+        <a 
+          href="/login" 
+          class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition text-lg font-semibold"
+        >
+          Iniciar Sesión
+        </a>
+        <a 
+          href="/groups" 
+          class="inline-block bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition text-lg font-semibold"
+        >
+          Ver Grupos
+        </a>
+      </div> -->
+    </div>
+  </main>
+</Layout>
