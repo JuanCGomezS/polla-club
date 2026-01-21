@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Firebase service account keys
+scripts/service-account-key.json
+**/service-account-key.json
+*.service-account.json

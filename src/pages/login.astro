@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/react/LoginForm';
+import LoginRedirect from '../components/react/LoginRedirect';
+---
+
+<Layout title="Login - PollaClub" showHeader={true}>
+  <LoginRedirect client:load />
+  <main class="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+    <LoginForm client:load />
+  </main>
+</Layout>

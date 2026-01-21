@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/react/AuthGuard';
+import GroupList from '../../components/react/GroupList';
+---
+
+<Layout title="Mis Grupos - PollaClub" showHeader={true}>
+  <AuthGuard client:load>
+    <GroupList client:load />
+  </AuthGuard>
+</Layout>

@@ -1,0 +1,185 @@
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where
+} from 'firebase/firestore';
+import { db } from './firebase';
+import type { Group } from './types';
+
+/**
+ * Obtiene un grupo por ID
+ */
+export async function getGroup(groupId: string): Promise<Group | null> {
+  try {
+    const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    
+    if (groupDoc.exists()) {
+      return { id: groupDoc.id, ...groupDoc.data() } as Group;
+    }
+    return null;
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al obtener grupo');
+  }
+}
+
+/**
+ * Obtiene todos los grupos de un usuario
+ */
+export async function getUserGroups(userId: string): Promise<Group[]> {
+  try {
+    // Buscar grupos donde el usuario es participante o admin
+    const groupsQuery = query(
+      collection(db, 'groups'),
+      where('participants', 'array-contains', userId)
+    );
+    
+    const groupsSnapshot = await getDocs(groupsQuery);
+    const groups: Group[] = [];
+    
+    groupsSnapshot.forEach((doc) => {
+      groups.push({ id: doc.id, ...doc.data() } as Group);
+    });
+    
+    // También buscar grupos donde es admin
+    const adminQuery = query(
+      collection(db, 'groups'),
+      where('adminUid', '==', userId)
+    );
+    
+    const adminSnapshot = await getDocs(adminQuery);
+    adminSnapshot.forEach((doc) => {
+      const group = { id: doc.id, ...doc.data() } as Group;
+      // Evitar duplicados
+      if (!groups.find(g => g.id === group.id)) {
+        groups.push(group);
+      }
+    });
+    
+    return groups;
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al obtener grupos del usuario');
+  }
+}
+
+/**
+ * Crea un nuevo grupo
+ */
+export async function createGroup(
+  competitionId: string,
+  name: string,
+  adminUid: string,
+  settings: Group['settings']
+): Promise<{ groupId: string; code: string }> {
+  try {
+    // Generar código único
+    const code = generateGroupCode();
+    
+    // Crear documento del grupo
+    const groupRef = doc(collection(db, 'groups'));
+    const groupId = groupRef.id;
+    
+    const now = Timestamp.now();
+    
+    await setDoc(groupRef, {
+      id: groupId,
+      competitionId,
+      name,
+      code,
+      adminUid,
+      participants: [adminUid], // El admin es el primer participante
+      isActive: true,
+      settings,
+      createdAt: now,
+      updatedAt: now
+    });
+    
+    // Actualizar el usuario para agregar el grupo
+    const userRef = doc(db, 'users', adminUid);
+    await updateDoc(userRef, {
+      groups: arrayUnion(groupId)
+    });
+    
+    return { groupId, code };
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al crear grupo');
+  }
+}
+
+/**
+ * Unirse a un grupo usando código
+ */
+export async function joinGroupByCode(code: string, userId: string): Promise<Group> {
+  try {
+    // Buscar grupo por código
+    const groupsQuery = query(
+      collection(db, 'groups'),
+      where('code', '==', code)
+    );
+    
+    const groupsSnapshot = await getDocs(groupsQuery);
+    
+    if (groupsSnapshot.empty) {
+      throw new Error('Código de grupo no válido');
+    }
+    
+    const groupDoc = groupsSnapshot.docs[0];
+    const groupData = groupDoc.data() as Group;
+    
+    // Verificar que el usuario no esté ya en el grupo
+    if (groupData.participants.includes(userId)) {
+      throw new Error('Ya eres participante de este grupo');
+    }
+    
+    // Agregar usuario al grupo
+    const groupRef = doc(db, 'groups', groupDoc.id);
+    await updateDoc(groupRef, {
+      participants: arrayUnion(userId),
+      updatedAt: serverTimestamp()
+    });
+    
+    // Actualizar usuario
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      groups: arrayUnion(groupDoc.id)
+    });
+    
+    return { id: groupDoc.id, ...groupData, participants: [...groupData.participants, userId] } as Group;
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al unirse al grupo');
+  }
+}
+
+/**
+ * Genera un código único para el grupo
+ */
+function generateGroupCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'PD-';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+/**
+ * Verifica si un usuario es admin del grupo
+ */
+export function isGroupAdmin(group: Group, userId: string): boolean {
+  return group.adminUid === userId;
+}
+
+/**
+ * Verifica si un usuario es participante del grupo
+ */
+export function isGroupParticipant(group: Group, userId: string): boolean {
+  return group.participants.includes(userId) || group.adminUid === userId;
+}
