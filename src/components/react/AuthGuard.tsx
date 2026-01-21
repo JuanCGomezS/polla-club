@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChange } from '../../lib/auth';
+import { getRoute } from '../../lib/utils';
 import type { User } from 'firebase/auth';
 
 interface AuthGuardProps {
@@ -46,7 +47,7 @@ export default function AuthGuard({
   if (requireAuth && !user) {
     // Redirigir inmediatamente si no hay usuario y se requiere auth
     if (mounted && !loading) {
-      window.location.href = '/login';
+      window.location.href = getRoute('/login');
       return null;
     }
     

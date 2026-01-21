@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getUserGroups } from '../../lib/groups';
 import { getCurrentUser } from '../../lib/auth';
+import { getRoute } from '../../lib/utils';
 import type { Group } from '../../lib/types';
 
 export default function GroupList() {
@@ -59,7 +60,7 @@ export default function GroupList() {
           </p>
           <div className="space-x-4">
             <a
-              href="/groups/create"
+              href={getRoute('/groups/create')}
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
             >
               Crear Grupo
@@ -100,7 +101,7 @@ export default function GroupList() {
         {groups.map((group) => (
           <a
             key={group.id}
-            href={`/groups/${group.id}`}
+            href={getRoute(`/groups/${group.id}`)}
             className="block p-6 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">

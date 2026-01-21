@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChange, getCurrentUser } from '../../lib/auth';
+import { getRoute } from '../../lib/utils';
 
 /**
  * Componente que redirige a /groups si el usuario ya está autenticado
@@ -16,7 +17,7 @@ export default function LoginRedirect() {
     const unsubscribe = onAuthStateChange((user) => {
       if (user) {
         // Si hay usuario, redirigir a grupos
-        window.location.href = '/groups';
+        window.location.href = getRoute('/groups');
       } else {
         setChecking(false);
       }
