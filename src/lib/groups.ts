@@ -95,7 +95,7 @@ export async function createGroup(
       name,
       code,
       adminUid,
-      participants: [adminUid], // El admin es el primer participante
+      participants: [adminUid],
       isActive: true,
       settings,
       createdAt: now,
@@ -110,6 +110,7 @@ export async function createGroup(
     
     return { groupId, code };
   } catch (error: any) {
+    console.error('[createGroup] Error general:', error);
     throw new Error(error.message || 'Error al crear grupo');
   }
 }
@@ -132,7 +133,7 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
     }
     
     const groupDoc = groupsSnapshot.docs[0];
-    const groupData = groupDoc.data() as Group;
+    const groupData = groupDoc.data();
     
     // Verificar que el usuario no esté ya en el grupo
     if (groupData.participants.includes(userId)) {
@@ -152,7 +153,11 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
       groups: arrayUnion(groupDoc.id)
     });
     
-    return { id: groupDoc.id, ...groupData, participants: [...groupData.participants, userId] } as Group;
+    return { 
+      id: groupDoc.id, 
+      ...groupData, 
+      participants: [...groupData.participants, userId] 
+    } as Group;
   } catch (error: any) {
     throw new Error(error.message || 'Error al unirse al grupo');
   }
@@ -182,4 +187,24 @@ export function isGroupAdmin(group: Group, userId: string): boolean {
  */
 export function isGroupParticipant(group: Group, userId: string): boolean {
   return group.participants.includes(userId) || group.adminUid === userId;
+}
+
+/**
+ * Verifica si un usuario tiene permiso para crear grupos
+ */
+export async function canUserCreateGroups(userId: string): Promise<boolean> {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      return false;
+    }
+    
+    const userData = userDoc.data();
+    return userData.canCreateGroups === true;
+  } catch (error: any) {
+    console.error('Error al verificar permiso de creación:', error);
+    return false;
+  }
 }
