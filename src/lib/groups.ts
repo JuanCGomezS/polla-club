@@ -134,6 +134,7 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
     
     const groupDoc = groupsSnapshot.docs[0];
     const groupData = groupDoc.data();
+    const groupId = groupDoc.id;
     
     // Verificar que el usuario no esté ya en el grupo
     if (groupData.participants.includes(userId)) {
@@ -141,7 +142,7 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
     }
     
     // Agregar usuario al grupo
-    const groupRef = doc(db, 'groups', groupDoc.id);
+    const groupRef = doc(db, 'groups', groupId);
     await updateDoc(groupRef, {
       participants: arrayUnion(userId),
       updatedAt: serverTimestamp()
@@ -150,7 +151,7 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
     // Actualizar usuario
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
-      groups: arrayUnion(groupDoc.id)
+      groups: arrayUnion(groupId)
     });
     
     return { 
