@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUserGroups } from '../../lib/groups';
+import { getUserGroups, canUserCreateGroups } from '../../lib/groups';
 import { getCurrentUser } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';
 import type { Group } from '../../lib/types';
@@ -8,6 +8,7 @@ export default function GroupList() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [canCreate, setCanCreate] = useState(false);
 
   useEffect(() => {
     loadGroups();
@@ -22,8 +23,14 @@ export default function GroupList() {
         return;
       }
 
-      const userGroups = await getUserGroups(user.uid);
+      // Verificar permiso de creación y cargar grupos en paralelo
+      const [userGroups, hasPermission] = await Promise.all([
+        getUserGroups(user.uid),
+        canUserCreateGroups(user.uid)
+      ]);
+      
       setGroups(userGroups);
+      setCanCreate(hasPermission);
     } catch (err: any) {
       setError(err.message || 'Error al cargar grupos');
     } finally {
@@ -56,17 +63,21 @@ export default function GroupList() {
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">No tienes grupos aún</h2>
           <p className="text-gray-600 mb-6">
-            Crea un grupo o únete a uno existente usando un código
+            {canCreate 
+              ? 'Crea un grupo o únete a uno existente usando un código'
+              : 'Únete a un grupo existente usando un código'}
           </p>
           <div className="space-x-4">
+            {canCreate && (
+              <a
+                href={getRoute('/groups/create')}
+                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+              >
+                Crear Grupo
+              </a>
+            )}
             <a
-              href={getRoute('/groups/create')}
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              Crear Grupo
-            </a>
-            <a
-              href="/groups/join"
+              href={getRoute('/groups/join')}
               className="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition"
             >
               Unirse a Grupo
@@ -82,14 +93,16 @@ export default function GroupList() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Mis Grupos</h1>
         <div className="space-x-2">
+          {canCreate && (
+            <a
+              href={getRoute('/groups/create')}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+            >
+              Crear Grupo
+            </a>
+          )}
           <a
-            href="/groups/create"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-          >
-            Crear Grupo
-          </a>
-          <a
-            href="/groups/join"
+            href={getRoute('/groups/join')}
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
           >
             Unirse

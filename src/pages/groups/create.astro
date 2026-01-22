@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/react/AuthGuard';
+import CreateGroupForm from '../../components/react/CreateGroupForm';
+---
+
+<Layout title="Crear Grupo - PollaClub" showHeader={true}>
+  <AuthGuard client:load>
+    <CreateGroupForm client:load />
+  </AuthGuard>
+</Layout>

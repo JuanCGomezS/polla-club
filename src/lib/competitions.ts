@@ -1,0 +1,72 @@
+import { collection, doc, getDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { db } from './firebase';
+import type { Competition } from './types';
+
+/**
+ * Obtiene todas las competiciones disponibles
+ */
+export async function getCompetitions(): Promise<Competition[]> {
+  try {
+    const competitionsRef = collection(db, 'competitions');
+    
+    // Intentar con el query completo (requiere índice compuesto)
+    try {
+      const competitionsQuery = query(
+        competitionsRef,
+        where('status', 'in', ['upcoming', 'active']),
+        orderBy('startDate', 'asc')
+      );
+      
+      const snapshot = await getDocs(competitionsQuery);
+      const competitions: Competition[] = [];
+      
+      snapshot.forEach((doc) => {
+        competitions.push({ id: doc.id, ...doc.data() } as Competition);
+      });
+      
+      return competitions;
+    } catch (indexError: any) {
+      // Si falla por falta de índice, intentar sin orderBy y ordenar manualmente
+      const competitionsQuery = query(
+        competitionsRef,
+        where('status', 'in', ['upcoming', 'active'])
+      );
+      
+      const snapshot = await getDocs(competitionsQuery);
+      const competitions: Competition[] = [];
+      
+      snapshot.forEach((doc) => {
+        competitions.push({ id: doc.id, ...doc.data() } as Competition);
+      });
+      
+      // Ordenar manualmente por fecha de inicio
+      competitions.sort((a, b) => {
+        const aDate = a.startDate?.toMillis() || 0;
+        const bDate = b.startDate?.toMillis() || 0;
+        return aDate - bDate;
+      });
+      
+      return competitions;
+    }
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al obtener competiciones');
+  }
+}
+
+/**
+ * Obtiene una competición por ID
+ */
+export async function getCompetition(competitionId: string): Promise<Competition | null> {
+  try {
+    const competitionRef = doc(db, 'competitions', competitionId);
+    const competitionDoc = await getDoc(competitionRef);
+    
+    if (!competitionDoc.exists()) {
+      return null;
+    }
+    
+    return { id: competitionDoc.id, ...competitionDoc.data() } as Competition;
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al obtener competición');
+  }
+}
