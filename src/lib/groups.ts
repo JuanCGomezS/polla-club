@@ -11,6 +11,7 @@ import {
   updateDoc,
   where
 } from 'firebase/firestore';
+import { getCurrentUser } from './auth';
 import { db } from './firebase';
 import type { Group } from './types';
 
@@ -148,11 +149,31 @@ export async function joinGroupByCode(code: string, userId: string): Promise<Gro
       updatedAt: serverTimestamp()
     });
     
-    // Actualizar usuario
+    // Actualizar o crear documento del usuario
     const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
-      groups: arrayUnion(groupId)
-    });
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      // Si el documento no existe, crearlo con datos básicos
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      
+      await setDoc(userRef, {
+        uid: userId,
+        displayName: currentUser.displayName || `Usuario ${userId.substring(0, 8)}`,
+        email: currentUser.email || '',
+        groups: [groupId],
+        canCreateGroups: false,
+        createdAt: serverTimestamp()
+      });
+    } else {
+      // Si existe, actualizarlo
+      await updateDoc(userRef, {
+        groups: arrayUnion(groupId)
+      });
+    }
     
     return { 
       id: groupDoc.id, 

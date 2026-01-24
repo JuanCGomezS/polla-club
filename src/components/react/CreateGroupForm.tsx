@@ -91,7 +91,7 @@ export default function CreateGroupForm() {
       );
 
       // Redirigir al grupo creado
-      window.location.href = getRoute(`/groups/${groupId}`);
+      window.location.href = getRoute(`/groups/dashboard?groupId=${groupId}&tab=predictions`);
     } catch (err: any) {
       setError(err.message || 'Error al crear grupo');
       setSubmitting(false);
