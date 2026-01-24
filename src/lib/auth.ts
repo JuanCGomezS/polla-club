@@ -6,7 +6,7 @@ import {
   updateProfile
 } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, serverTimestamp, query, where, collection } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import type { User as UserType } from './types';
 
@@ -95,6 +95,44 @@ export async function getUserData(uid: string): Promise<UserType | null> {
   } catch (error: any) {
     throw new Error(error.message || 'Error al obtener datos del usuario');
   }
+}
+
+/**
+ * Obtiene múltiples usuarios en batch usando Promise.all para paralelizar lecturas
+ * Más eficiente que hacer lecturas secuenciales
+ */
+export async function batchGetUsers(uids: string[]): Promise<Map<string, UserType>> {
+  const usersMap = new Map<string, UserType>();
+  
+  // Firestore permite máximo 10 documentos por batch
+  const batchSize = 10;
+  
+  for (let i = 0; i < uids.length; i += batchSize) {
+    const batch = uids.slice(i, i + batchSize);
+    
+    // Usar Promise.all para paralelizar las lecturas (más eficiente que secuencial)
+    const userPromises = batch.map(async (uid) => {
+      try {
+        const userRef = doc(db, 'users', uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          return { uid, data: userDoc.data() as UserType };
+        }
+        return { uid, data: null };
+      } catch {
+        return { uid, data: null };
+      }
+    });
+    
+    const results = await Promise.all(userPromises);
+    results.forEach(({ uid, data }) => {
+      if (data) {
+        usersMap.set(uid, data);
+      }
+    });
+  }
+  
+  return usersMap;
 }
 
 /**

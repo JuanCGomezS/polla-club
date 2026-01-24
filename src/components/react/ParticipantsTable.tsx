@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { getGroup, isGroupAdmin } from '../../lib/groups';
-import { getUserData } from '../../lib/auth';
+import { isGroupAdmin } from '../../lib/groups';
+import { batchGetUsers } from '../../lib/auth';
 import type { Group, User } from '../../lib/types';
 
 interface ParticipantsTableProps {
   groupId: string;
+  group: Group; // Recibido del padre para evitar lectura duplicada
 }
 
 interface ParticipantWithPoints {
@@ -13,61 +14,39 @@ interface ParticipantWithPoints {
   predictionsCount: number;
 }
 
-export default function ParticipantsTable({ groupId }: ParticipantsTableProps) {
-  const [group, setGroup] = useState<Group | null>(null);
+export default function ParticipantsTable({ groupId, group: groupProp }: ParticipantsTableProps) {
   const [participants, setParticipants] = useState<ParticipantWithPoints[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadData();
-  }, [groupId]);
+  }, [groupId, groupProp]);
 
   const loadData = async () => {
     try {
-      const groupData = await getGroup(groupId);
-      if (!groupData) {
-        setError('Grupo no encontrado');
-        setLoading(false);
-        return;
-      }
+      const uids = [...new Set([...groupProp.participants, groupProp.adminUid])];
 
-      setGroup(groupData);
+      // Batch read: leer todos los usuarios en una sola operación (múltiples batches si > 10)
+      const usersMap = await batchGetUsers(uids);
 
       const participantsData: ParticipantWithPoints[] = [];
-      const uids = [...new Set([...groupData.participants, groupData.adminUid])];
 
       for (const uid of uids) {
-        try {
-          const userData = await getUserData(uid);
-          if (userData) {
-            participantsData.push({
-              user: userData,
-              totalPoints: 0,
-              predictionsCount: 0
-            });
-          } else {
-            // Mostrar usuario aunque no tenga documento completo
-            participantsData.push({
-              user: {
-                uid,
-                displayName: `Usuario ${uid.substring(0, 8)}...`,
-                email: 'Sin email',
-                groups: [],
-                canCreateGroups: false,
-                createdAt: { toMillis: () => Date.now() } as any
-              },
-              totalPoints: 0,
-              predictionsCount: 0
-            });
-          }
-        } catch (err) {
-          // Mostrar usuario aunque haya error
+        const userData = usersMap.get(uid);
+        if (userData) {
+          participantsData.push({
+            user: userData,
+            totalPoints: 0,
+            predictionsCount: 0
+          });
+        } else {
+          // Mostrar usuario aunque no tenga documento completo
           participantsData.push({
             user: {
               uid,
               displayName: `Usuario ${uid.substring(0, 8)}...`,
-              email: 'Error al cargar',
+              email: 'Sin email',
               groups: [],
               canCreateGroups: false,
               createdAt: { toMillis: () => Date.now() } as any
@@ -141,7 +120,7 @@ export default function ParticipantsTable({ groupId }: ParticipantsTableProps) {
                       <div className="text-sm font-medium text-gray-900">{participant.user.displayName}</div>
                       <div className="text-sm text-gray-500">{participant.user.email}</div>
                     </div>
-                    {group && participant.user.uid === group.adminUid && (
+                    {groupProp && participant.user.uid === groupProp.adminUid && (
                       <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">Admin</span>
                     )}
                   </div>

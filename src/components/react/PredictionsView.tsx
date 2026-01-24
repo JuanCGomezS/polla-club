@@ -6,20 +6,31 @@ import type { Group, Match } from '../../lib/types';
 
 interface PredictionsViewProps {
   groupId: string;
+  group?: Group; // Opcional: si viene del padre, no necesita cargarlo
 }
 
-export default function PredictionsView({ groupId }: PredictionsViewProps) {
-  const [group, setGroup] = useState<Group | null>(null);
+export default function PredictionsView({ groupId, group: groupProp }: PredictionsViewProps) {
+  const [group, setGroup] = useState<Group | null>(groupProp || null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!groupProp); // Si ya viene el grupo, no mostrar loading
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadData();
-  }, [groupId]);
+  }, [groupId, groupProp]);
 
   const loadData = async () => {
     try {
+      // Si ya tenemos el grupo del prop, usarlo directamente
+      if (groupProp) {
+        setGroup(groupProp);
+        const matchesData = await getMatchesByCompetition(groupProp.competitionId);
+        setMatches(matchesData);
+        setLoading(false);
+        return;
+      }
+
+      // Si no viene el grupo, cargarlo (fallback)
       const user = getCurrentUser();
       if (!user) {
         setError('No hay usuario autenticado');

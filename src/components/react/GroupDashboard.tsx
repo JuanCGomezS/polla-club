@@ -212,9 +212,15 @@ export default function GroupDashboard() {
       </div>
 
       <div>
-        {activeTab === 'predictions' && groupId && <PredictionsView groupId={groupId} />}
-        {activeTab === 'participants' && groupId && <ParticipantsTable groupId={groupId} />}
-        {activeTab === 'settings' && groupId && <GroupSettings groupId={groupId} />}
+        {activeTab === 'predictions' && groupId && group && (
+          <PredictionsView groupId={groupId} group={group} />
+        )}
+        {activeTab === 'participants' && groupId && group && (
+          <ParticipantsTable groupId={groupId} group={group} />
+        )}
+        {activeTab === 'settings' && groupId && group && (
+          <GroupSettings groupId={groupId} group={group} />
+        )}
       </div>
     </div>
   );

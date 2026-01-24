@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
-import { getGroup, isGroupAdmin } from '../../lib/groups';
+import { isGroupAdmin } from '../../lib/groups';
 import { getCurrentUser } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';
 import type { Group } from '../../lib/types';
 
 interface GroupSettingsProps {
   groupId: string;
+  group: Group; // Recibido del padre para evitar lectura duplicada
 }
 
-export default function GroupSettings({ groupId }: GroupSettingsProps) {
-  const [group, setGroup] = useState<Group | null>(null);
+export default function GroupSettings({ groupId, group: groupProp }: GroupSettingsProps) {
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [userIsAdmin, setUserIsAdmin] = useState(false);
 
   useEffect(() => {
-    loadGroup();
-  }, [groupId]);
+    loadData();
+  }, [groupId, groupProp]);
 
-  const loadGroup = async () => {
+  const loadData = async () => {
     try {
       const user = getCurrentUser();
       if (!user) {
@@ -27,20 +27,12 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
         return;
       }
 
-      const groupData = await getGroup(groupId);
-      if (!groupData) {
-        setError('Grupo no encontrado');
+      if (!isGroupAdmin(groupProp, user.uid)) {
+        setError('No tienes permiso para ver la configuración de este grupo');
         setLoading(false);
         return;
       }
 
-      if (!isGroupAdmin(groupData, user.uid)) {
-        setError('No tienes permiso para ver la configuraci?n de este grupo');
-        setLoading(false);
-        return;
-      }
-
-      setGroup(groupData);
       setUserIsAdmin(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar grupo');
@@ -71,7 +63,7 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
     );
   }
 
-  if (!group || !userIsAdmin) return null;
+  if (!userIsAdmin) return null;
 
   return (
     <div className="space-y-6">
@@ -80,21 +72,21 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b border-gray-200">
             <span className="text-gray-700">Marcador Exacto</span>
-            <span className="font-semibold text-gray-900">{group.settings.pointsExactScore} puntos</span>
+            <span className="font-semibold text-gray-900">{groupProp.settings.pointsExactScore} puntos</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b border-gray-200">
             <span className="text-gray-700">Acertar Ganador</span>
-            <span className="font-semibold text-gray-900">{group.settings.pointsWinner} puntos</span>
+            <span className="font-semibold text-gray-900">{groupProp.settings.pointsWinner} puntos</span>
           </div>
-          {group.settings.pointsGoalDifference != null && (
+          {groupProp.settings.pointsGoalDifference != null && (
             <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-gray-700">Diferencia de Goles</span>
-              <span className="font-semibold text-gray-900">{group.settings.pointsGoalDifference} puntos</span>
+              <span className="font-semibold text-gray-900">{groupProp.settings.pointsGoalDifference} puntos</span>
             </div>
           )}
         </div>
         <p className="mt-4 text-sm text-gray-500">
-          Las reglas de puntaje no se pueden modificar despu?s de crear el grupo.
+          Las reglas de puntaje no se pueden modificar después de crear el grupo.
         </p>
       </section>
 
@@ -103,13 +95,13 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-700">
-              El grupo est? actualmente{' '}
-              <span className="font-semibold">{group.isActive ? 'activo' : 'inactivo'}</span>
+              El grupo está actualmente{' '}
+              <span className="font-semibold">{groupProp.isActive ? 'activo' : 'inactivo'}</span>
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              {group.isActive
-                ? 'Los participantes pueden hacer pron?sticos y ver resultados.'
-                : 'El grupo est? pausado.'}
+              {groupProp.isActive
+                ? 'Los participantes pueden hacer pronósticos y ver resultados.'
+                : 'El grupo está pausado.'}
             </p>
           </div>
         </div>
@@ -118,7 +110,7 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
       <section className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Participantes</h2>
         <p className="text-gray-700 mb-4">
-          Total de participantes: <span className="font-semibold">{group.participants.length}</span>
+          Total de participantes: <span className="font-semibold">{groupProp.participants.length}</span>
         </p>
       </section>
     </div>
