@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { createGroup } from '../../lib/groups';
-import { canUserCreateGroups } from '../../lib/groups';
+import { createGroup, canUserCreateGroups } from '../../lib/groups';
 import { getCompetitions } from '../../lib/competitions';
 import { getCurrentUser } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';

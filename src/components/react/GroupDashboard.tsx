@@ -3,7 +3,7 @@ import { getGroup, isGroupAdmin } from '../../lib/groups';
 import { getCurrentUser } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';
 import PredictionsView from './PredictionsView';
-import ParticipantsTable from './ParticipantsTable';
+import GroupLeaderboard from './GroupLeaderboard';
 import GroupSettings from './GroupSettings';
 import type { Group } from '../../lib/types';
 
@@ -115,17 +115,6 @@ export default function GroupDashboard() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Cargando grupo...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="max-w-4xl mx-auto mt-8 p-6 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -216,7 +205,7 @@ export default function GroupDashboard() {
           <PredictionsView groupId={groupId} group={group} />
         )}
         {activeTab === 'participants' && groupId && group && (
-          <ParticipantsTable groupId={groupId} group={group} />
+          <GroupLeaderboard groupId={groupId} group={group} />
         )}
         {activeTab === 'settings' && groupId && group && (
           <GroupSettings groupId={groupId} group={group} />

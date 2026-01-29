@@ -83,48 +83,48 @@ export function formatMatchMinute(
 
   if (status === 'halftime') {
     if (extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
-      return `Descanso (45+${extraTimeTotal})`;
+      return `Entretiempo (45+${extraTimeTotal})`;
     }
-    return 'Descanso';
+    return 'Entretiempo';
   }
 
   if (status === 'first_half_extra' && extraTime !== null && extraTime !== undefined && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
     if (seconds !== null && seconds !== undefined) {
       const minutesInExtraTime = Math.floor(extraTime);
       const secondsInExtraTime = seconds;
-      return `45+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
+      return `Minuto 45+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
     }
-    return `45+${extraTimeTotal}`;
+    return `Minuto 45+${extraTimeTotal}`;
   }
 
   if (status === 'second_half_extra' && extraTime !== null && extraTime !== undefined && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
     if (seconds !== null && seconds !== undefined) {
       const minutesInExtraTime = Math.floor(extraTime);
       const secondsInExtraTime = seconds;
-      return `90+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
+      return `Minuto 90+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
     }
-    return `90+${extraTimeTotal}`;
+    return `Minuto 90+${extraTimeTotal}`;
   }
 
   if (status === 'first_half' && minute === 45) {
     if (seconds !== null && seconds !== undefined) {
-      return `45:${seconds.toString().padStart(2, '0')}`;
+      return `Minuto 45:${seconds.toString().padStart(2, '0')}`;
     }
-    return '45';
+    return 'Minuto 45';
   }
 
   if (status === 'second_half' && minute === 90) {
     if (seconds !== null && seconds !== undefined) {
-      return `90:${seconds.toString().padStart(2, '0')}`;
+      return `Minuto 90:${seconds.toString().padStart(2, '0')}`;
     }
-    return '90';
+    return 'Minuto 90';
   }
 
   if (status === 'finished') {
     if (extraTime !== null && extraTime !== undefined && extraTime > 0) {
-      return `90+${extraTime}`;
+      return `Minuto 90+${extraTime}`;
     }
-    return '90+';
+    return 'Minuto 90+';
   }
 
   if (seconds !== null && seconds !== undefined) {

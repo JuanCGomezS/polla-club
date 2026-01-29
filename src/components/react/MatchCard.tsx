@@ -1,11 +1,13 @@
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { calculateMatchMinute, formatMatchMinute } from '../../lib/match-time';
-import type { Match, Prediction } from '../../lib/types';
+import MatchLeaderboardModal from './MatchLeaderboardModal';
+import type { Match, Prediction, Group } from '../../lib/types';
 
 interface MatchCardProps {
   match: Match;
   groupId: string;
+  group: Group;
   userPrediction?: Prediction;
   onSavePrediction: (matchId: string, team1Score: number, team2Score: number) => Promise<void>;
   isSaving: boolean;
@@ -14,6 +16,8 @@ interface MatchCardProps {
 
 export default function MatchCard({
   match,
+  groupId,
+  group,
   userPrediction,
   onSavePrediction,
   isSaving,
@@ -27,6 +31,7 @@ export default function MatchCard({
   );
 
   const [isEditing, setIsEditing] = useState(!userPrediction && canEdit);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
   useEffect(() => {
     if (userPrediction) {
@@ -98,7 +103,7 @@ export default function MatchCard({
     }
     return (
       <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-        Por Jugar {/* {match.round} */}
+        Por Jugar
       </span>
     );
   };
@@ -153,7 +158,7 @@ export default function MatchCard({
       {match.status === 'live' && displayMinute != null && (
         <div className="text-center mb-3">
           <span className="text-sm font-semibold text-green-700">
-            Minuto {formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, displaySeconds, minuteStatus) || displayMinute}
+            {formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, displaySeconds, minuteStatus) || displayMinute}
           </span>
         </div>
       )}
@@ -171,9 +176,13 @@ export default function MatchCard({
         </div>
 
         {isMatchStarted && result ? (
-          <>
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-2 transition group"
+            onClick={() => setIsLeaderboardOpen(true)}
+            title="Click para ver tabla de posiciones"
+          >
             <div className="text-center min-w-[60px]">
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
                 {result.team1Score}
               </span>
               {userPrediction && (
@@ -184,7 +193,7 @@ export default function MatchCard({
             </div>
             <span className="text-gray-400 font-medium">vs</span>
             <div className="text-center min-w-[60px]">
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
                 {result.team2Score}
               </span>
               {userPrediction && (
@@ -193,7 +202,15 @@ export default function MatchCard({
                 </span>
               )}
             </div>
-          </>
+            <svg 
+              className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition ml-1" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
         ) : canEdit && isEditing ? (
           <>
             <input
@@ -300,6 +317,16 @@ export default function MatchCard({
         >
           Agregar pronóstico
         </button>
+      )}
+
+      {(match.status === 'live' || match.status === 'finished') && match.result && (
+        <MatchLeaderboardModal
+          match={match}
+          group={group}
+          groupId={groupId}
+          isOpen={isLeaderboardOpen}
+          onClose={() => setIsLeaderboardOpen(false)}
+        />
       )}
     </div>
   );

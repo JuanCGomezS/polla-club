@@ -11,19 +11,6 @@ const firebaseConfig = {
     appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
 };
 
-if (import.meta.env.DEV) {
-    console.log('Firebase Config Check:', {
-        hasApiKey: !!firebaseConfig.apiKey,
-        hasAuthDomain: !!firebaseConfig.authDomain,
-        hasProjectId: !!firebaseConfig.projectId,
-        hasStorageBucket: !!firebaseConfig.storageBucket,
-        hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
-        hasAppId: !!firebaseConfig.appId,
-        allEnvKeys: Object.keys(import.meta.env).filter(key => key.startsWith('PUBLIC_') || key.startsWith('VITE_')),
-        importMetaEnv: import.meta.env
-    });
-}
-
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
     const missing = [];
     if (!firebaseConfig.apiKey) missing.push('PUBLIC_FIREBASE_API_KEY');

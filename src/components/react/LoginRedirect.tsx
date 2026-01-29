@@ -23,10 +23,9 @@ export default function LoginRedirect() {
       }
     });
 
-    // También verificar inmediatamente
     const currentUser = getCurrentUser();
     if (currentUser) {
-      window.location.href = '/groups';
+      window.location.href = getRoute('/groups');
     } else {
       setChecking(false);
     }

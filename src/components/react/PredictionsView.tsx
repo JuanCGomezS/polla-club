@@ -29,7 +29,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
         setGroup(groupProp);
         const matchesData = await getMatchesByCompetition(groupProp.competitionId);
         setMatches(matchesData);
-        await loadUserPredictions(matchesData);
+        await loadUserPredictions(matchesData, groupProp);
         setLoading(false);
         return;
       }
@@ -51,7 +51,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       const matchesData = await getMatchesByCompetition(groupData.competitionId);
       setGroup(groupData);
       setMatches(matchesData);
-      await loadUserPredictions(matchesData);
+      await loadUserPredictions(matchesData, groupData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar datos');
     } finally {
@@ -59,54 +59,33 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     }
   };
 
-  const loadUserPredictions = async (matchesData: Match[]) => {
+  const loadUserPredictions = async (matchesData: Match[], groupData: Group) => {
     const user = getCurrentUser();
-    if (!user || !group) {
-      console.warn('[PredictionsView] No hay usuario o grupo para cargar pronósticos');
-      return;
+    if (!user) return;
+
+    const scheduledMatches = matchesData.filter((m) => m.status === 'scheduled');
+    const predictionPromises = scheduledMatches.map((match) =>
+      getUserPrediction(groupId, user.uid, match.id).then((p) => (p ? { matchId: match.id, prediction: p } : null))
+    );
+    const results = await Promise.all(predictionPromises);
+    const predictions: Record<string, Prediction> = {};
+    results.forEach((r) => {
+      if (r) predictions[r.matchId] = r.prediction;
+    });
+
+    const otherMatches = matchesData.filter((m) => m.status !== 'scheduled');
+    if (otherMatches.length > 0) {
+      const otherResults = await Promise.all(
+        otherMatches.map((match) =>
+          getUserPrediction(groupId, user.uid, match.id).then((p) => (p ? { matchId: match.id, prediction: p } : null))
+        )
+      );
+      otherResults.forEach((r) => {
+        if (r) predictions[r.matchId] = r.prediction;
+      });
     }
 
-    const scheduledMatches = matchesData.filter(m => m.status === 'scheduled');
-    const predictions: Record<string, Prediction> = {};
-    
-    const predictionPromises = scheduledMatches.map(async (match) => {
-      try {
-        const prediction = await getUserPrediction(groupId, user.uid, match.id);
-        if (prediction) {
-          return { matchId: match.id, prediction };
-        }
-        return null;
-      } catch (err: any) {
-        return null;
-      }
-    });
-    
-    const results = await Promise.all(predictionPromises);
-    results.forEach((result) => {
-      if (result) {
-        predictions[result.matchId] = result.prediction;
-      }
-    });
-    
     setUserPredictions(predictions);
-    
-    const otherMatches = matchesData.filter(m => m.status !== 'scheduled');
-    if (otherMatches.length > 0) {
-      Promise.all(
-        otherMatches.map(async (match) => {
-          try {
-            const prediction = await getUserPrediction(groupId, user.uid, match.id);
-            if (prediction) {
-              setUserPredictions(prev => ({
-                ...prev,
-                [match.id]: prediction
-              }));
-            }
-          } catch (err) {
-          }
-        })
-      )
-    }
   };
 
   const handleSavePrediction = async (matchId: string, team1Score: number, team2Score: number) => {
@@ -119,17 +98,10 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       
       const prediction = await getUserPrediction(groupId, user.uid, matchId);
       if (prediction) {
-        setUserPredictions(prev => ({
-          ...prev,
-          [matchId]: prediction
-        }));
-      } else {
-        console.error('Pronostico guardado pero no se pudo recuperar');
+        setUserPredictions((prev) => ({ ...prev, [matchId]: prediction }));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al guardar pronostico';
-      console.error('Error al guardar pronostico:', err);
-      alert(errorMessage);
+      alert(err instanceof Error ? err.message : 'Error al guardar pronóstico');
     } finally {
       setSavingPrediction(null);
     }
@@ -177,6 +149,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
                 key={match.id}
                 match={match}
                 groupId={groupId}
+                group={group!}
                 userPrediction={userPredictions[match.id]}
                 onSavePrediction={handleSavePrediction}
                 isSaving={savingPrediction === match.id}
@@ -196,6 +169,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
                 key={match.id}
                 match={match}
                 groupId={groupId}
+                group={group!}
                 userPrediction={userPredictions[match.id]}
                 onSavePrediction={handleSavePrediction}
                 isSaving={savingPrediction === match.id}
@@ -215,6 +189,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
                 key={match.id}
                 match={match}
                 groupId={groupId}
+                group={group!}
                 userPrediction={userPredictions[match.id]}
                 onSavePrediction={handleSavePrediction}
                 isSaving={false}

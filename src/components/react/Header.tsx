@@ -31,20 +31,14 @@ export default function Header() {
     try {
       const data = await getUserData(uid);
       setUserData(data);
-    } catch (error) {
-      console.error('Error loading user data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await logoutUser();
-      window.location.href = getRoute('/');
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
+    await logoutUser();
+    window.location.href = getRoute('/');
   };
 
   if (loading) {

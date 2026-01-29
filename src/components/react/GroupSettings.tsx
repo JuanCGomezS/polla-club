@@ -1,69 +1,35 @@
-import { useEffect, useState } from 'react';
-import { isGroupAdmin } from '../../lib/groups';
 import { getCurrentUser } from '../../lib/auth';
+import { isGroupAdmin } from '../../lib/groups';
 import { getRoute } from '../../lib/utils';
 import type { Group } from '../../lib/types';
 
 interface GroupSettingsProps {
   groupId: string;
-  group: Group; // Recibido del padre para evitar lectura duplicada
+  group: Group;
 }
 
 export default function GroupSettings({ groupId, group: groupProp }: GroupSettingsProps) {
-  const [userIsAdmin, setUserIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const user = getCurrentUser();
+  const isAdmin = user ? isGroupAdmin(groupProp, user.uid) : false;
 
-  useEffect(() => {
-    loadData();
-  }, [groupId, groupProp]);
-
-  const loadData = async () => {
-    try {
-      const user = getCurrentUser();
-      if (!user) {
-        setError('No hay usuario autenticado');
-        setLoading(false);
-        return;
-      }
-
-      if (!isGroupAdmin(groupProp, user.uid)) {
-        setError('No tienes permiso para ver la configuración de este grupo');
-        setLoading(false);
-        return;
-      }
-
-      setUserIsAdmin(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al cargar grupo');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Cargando configuración...</p>
-        </div>
+      <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded">
+        <p>No hay usuario autenticado.</p>
       </div>
     );
   }
 
-  if (error) {
+  if (!isAdmin) {
     return (
       <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded">
-        <p>{error}</p>
+        <p>No tienes permiso para ver la configuración de este grupo.</p>
         <a href={getRoute(`/groups/dashboard?groupId=${groupId}&tab=predictions`)} className="mt-4 inline-block text-blue-600 hover:text-blue-800">
           Volver al dashboard
         </a>
       </div>
     );
   }
-
-  if (!userIsAdmin) return null;
 
   return (
     <div className="space-y-6">
