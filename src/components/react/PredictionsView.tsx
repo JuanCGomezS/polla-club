@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { getGroup } from '../../lib/groups';
 import { getMatchesByCompetition, filterUpcomingMatches, filterLiveMatches, filterFinishedMatches } from '../../lib/matches';
 import { getCurrentUser } from '../../lib/auth';
-import type { Group, Match } from '../../lib/types';
+import { getUserPrediction, savePrediction } from '../../lib/predictions';
+import type { Group, Match, Prediction } from '../../lib/types';
+import MatchCard from './MatchCard';
 
 interface PredictionsViewProps {
   groupId: string;
@@ -14,23 +16,24 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(!groupProp); // Si ya viene el grupo, no mostrar loading
   const [error, setError] = useState('');
+  const [userPredictions, setUserPredictions] = useState<Record<string, Prediction>>({});
+  const [savingPrediction, setSavingPrediction] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
-  }, [groupId, groupProp]);
+  }, [groupId, groupProp?.id]);
 
   const loadData = async () => {
     try {
-      // Si ya tenemos el grupo del prop, usarlo directamente
       if (groupProp) {
         setGroup(groupProp);
         const matchesData = await getMatchesByCompetition(groupProp.competitionId);
         setMatches(matchesData);
+        await loadUserPredictions(matchesData);
         setLoading(false);
         return;
       }
 
-      // Si no viene el grupo, cargarlo (fallback)
       const user = getCurrentUser();
       if (!user) {
         setError('No hay usuario autenticado');
@@ -48,10 +51,87 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       const matchesData = await getMatchesByCompetition(groupData.competitionId);
       setGroup(groupData);
       setMatches(matchesData);
+      await loadUserPredictions(matchesData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserPredictions = async (matchesData: Match[]) => {
+    const user = getCurrentUser();
+    if (!user || !group) {
+      console.warn('[PredictionsView] No hay usuario o grupo para cargar pronósticos');
+      return;
+    }
+
+    const scheduledMatches = matchesData.filter(m => m.status === 'scheduled');
+    const predictions: Record<string, Prediction> = {};
+    
+    const predictionPromises = scheduledMatches.map(async (match) => {
+      try {
+        const prediction = await getUserPrediction(groupId, user.uid, match.id);
+        if (prediction) {
+          return { matchId: match.id, prediction };
+        }
+        return null;
+      } catch (err: any) {
+        return null;
+      }
+    });
+    
+    const results = await Promise.all(predictionPromises);
+    results.forEach((result) => {
+      if (result) {
+        predictions[result.matchId] = result.prediction;
+      }
+    });
+    
+    setUserPredictions(predictions);
+    
+    const otherMatches = matchesData.filter(m => m.status !== 'scheduled');
+    if (otherMatches.length > 0) {
+      Promise.all(
+        otherMatches.map(async (match) => {
+          try {
+            const prediction = await getUserPrediction(groupId, user.uid, match.id);
+            if (prediction) {
+              setUserPredictions(prev => ({
+                ...prev,
+                [match.id]: prediction
+              }));
+            }
+          } catch (err) {
+          }
+        })
+      )
+    }
+  };
+
+  const handleSavePrediction = async (matchId: string, team1Score: number, team2Score: number) => {
+    const user = getCurrentUser();
+    if (!user || !group) return;
+
+    setSavingPrediction(matchId);
+    try {
+      await savePrediction(groupId, user.uid, matchId, team1Score, team2Score);
+      
+      const prediction = await getUserPrediction(groupId, user.uid, matchId);
+      if (prediction) {
+        setUserPredictions(prev => ({
+          ...prev,
+          [matchId]: prediction
+        }));
+      } else {
+        console.error('Pronostico guardado pero no se pudo recuperar');
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar pronostico';
+      console.error('Error al guardar pronostico:', err);
+      alert(errorMessage);
+    } finally {
+      setSavingPrediction(null);
     }
   };
 
@@ -74,67 +154,53 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     );
   }
 
+  if (!group) {
+    return (
+      <div className="p-6 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+        <p>No se pudo cargar el grupo.</p>
+      </div>
+    );
+  }
+
   const upcomingMatches = filterUpcomingMatches(matches);
   const liveMatches = filterLiveMatches(matches);
   const finishedMatches = filterFinishedMatches(matches);
 
   return (
-    <div className="space-y-8">
-      {upcomingMatches.length > 0 && (
+    <div className="space-y-6">
+      {liveMatches.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Próximos Partidos</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingMatches.map((match) => (
-              <div key={match.id} className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500">
-                    {match.scheduledTime?.toDate?.()?.toLocaleDateString?.('es-ES', {
-                      day: 'numeric',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">{match.round}</span>
-                </div>
-                <div className="text-center my-4">
-                  <div className="font-semibold text-lg">{match.team1}</div>
-                  <div className="text-gray-400 my-1">vs</div>
-                  <div className="font-semibold text-lg">{match.team2}</div>
-                </div>
-                <p className="text-sm text-gray-600 text-center">Próximamente podrás hacer tu pronóstico</p>
-              </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-3">Partidos en Curso</h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {liveMatches.map((match) => (
+              <MatchCard
+                key={match.id}
+                match={match}
+                groupId={groupId}
+                userPrediction={userPredictions[match.id]}
+                onSavePrediction={handleSavePrediction}
+                isSaving={savingPrediction === match.id}
+                canEdit={false}
+              />
             ))}
           </div>
         </section>
       )}
 
-      {liveMatches.length > 0 && (
+      {upcomingMatches.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Partidos en Curso</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {liveMatches.map((match) => (
-              <div key={match.id} className="p-4 bg-white border border-green-200 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500">
-                    {match.scheduledTime?.toDate?.()?.toLocaleDateString?.('es-ES', {
-                      day: 'numeric',
-                      month: 'short'
-                    })}
-                  </span>
-                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded animate-pulse">EN VIVO</span>
-                </div>
-                <div className="text-center my-4">
-                  <div className="font-semibold text-lg">{match.team1}</div>
-                  {match.result && (
-                    <div className="text-2xl font-bold my-2">
-                      {match.result.team1Score} - {match.result.team2Score}
-                    </div>
-                  )}
-                  <div className="font-semibold text-lg">{match.team2}</div>
-                </div>
-                <p className="text-sm text-gray-600 text-center">Ver pronósticos del grupo</p>
-              </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-3">Proximos Partidos</h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {upcomingMatches.map((match) => (
+              <MatchCard
+                key={match.id}
+                match={match}
+                groupId={groupId}
+                userPrediction={userPredictions[match.id]}
+                onSavePrediction={handleSavePrediction}
+                isSaving={savingPrediction === match.id}
+                canEdit={true}
+              />
             ))}
           </div>
         </section>
@@ -142,30 +208,18 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
 
       {finishedMatches.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Partidos Finalizados</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <h2 className="text-xl font-bold text-gray-900 mb-3">Partidos Finalizados</h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {finishedMatches.map((match) => (
-              <div key={match.id} className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500">
-                    {match.scheduledTime?.toDate?.()?.toLocaleDateString?.('es-ES', {
-                      day: 'numeric',
-                      month: 'short'
-                    })}
-                  </span>
-                  <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded">Finalizado</span>
-                </div>
-                <div className="text-center my-4">
-                  <div className="font-semibold text-lg">{match.team1}</div>
-                  {match.result && (
-                    <div className="text-2xl font-bold my-2">
-                      {match.result.team1Score} - {match.result.team2Score}
-                    </div>
-                  )}
-                  <div className="font-semibold text-lg">{match.team2}</div>
-                </div>
-                <p className="text-sm text-gray-600 text-center">Ver tabla de pronósticos</p>
-              </div>
+              <MatchCard
+                key={match.id}
+                match={match}
+                groupId={groupId}
+                userPrediction={userPredictions[match.id]}
+                onSavePrediction={handleSavePrediction}
+                isSaving={false}
+                canEdit={false}
+              />
             ))}
           </div>
         </section>

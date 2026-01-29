@@ -39,12 +39,18 @@ export interface Match {
   round: MatchRound;
   team1: string;
   team2: string;
+  team1Short?: string;
+  team2Short?: string;
   scheduledTime: Timestamp;
+  startTime?: Timestamp;
   status: MatchStatus;
   result?: {
     team1Score: number;
     team2Score: number;
   };
+  extraTime1?: number;
+  extraTime2?: number;
+  halftimeDuration?: number;
   groupStage?: {
     group: GroupLetter;
     matchDay: number;

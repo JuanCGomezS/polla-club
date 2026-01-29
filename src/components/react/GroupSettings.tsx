@@ -46,7 +46,7 @@ export default function GroupSettings({ groupId, group: groupProp }: GroupSettin
       <div className="flex items-center justify-center min-h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Cargando configuraci?n...</p>
+          <p className="mt-4 text-gray-600">Cargando configuración...</p>
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ export default function GroupSettings({ groupId, group: groupProp }: GroupSettin
             <span className="text-gray-700">Acertar Ganador</span>
             <span className="font-semibold text-gray-900">{groupProp.settings.pointsWinner} puntos</span>
           </div>
-          {groupProp.settings.pointsGoalDifference != null && (
+          {groupProp.settings.pointsGoalDifference != null && groupProp.settings.pointsGoalDifference > 0 && (
             <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-gray-700">Diferencia de Goles</span>
               <span className="font-semibold text-gray-900">{groupProp.settings.pointsGoalDifference} puntos</span>
@@ -88,6 +88,37 @@ export default function GroupSettings({ groupId, group: groupProp }: GroupSettin
         <p className="mt-4 text-sm text-gray-500">
           Las reglas de puntaje no se pueden modificar después de crear el grupo.
         </p>
+      </section>
+
+      <section className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Pronósticos Bonus</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Opciones habilitadas para este grupo. Las que tienen 0 puntos no están activas.
+        </p>
+        <div className="space-y-3">
+          {(() => {
+            const s = groupProp.settings;
+            const items: { label: string; value: number | undefined }[] = [
+              { label: 'Ganador de la competición', value: s.pointsWinnerBonus },
+              { label: 'Segundo lugar', value: s.pointsRunnerUp },
+              { label: 'Tercer lugar', value: s.pointsThirdPlace },
+              { label: 'Máximo goleador', value: s.pointsTopScorer },
+              { label: 'Máximo asistidor', value: s.pointsTopAssister }
+            ];
+            const enabled = items.filter((i) => i.value != null && i.value > 0);
+            if (enabled.length === 0) {
+              return (
+                <p className="text-sm text-gray-500 py-2">No hay pronósticos bonus habilitados.</p>
+              );
+            }
+            return enabled.map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                <span className="text-gray-700">{label}</span>
+                <span className="font-semibold text-gray-900">{value} puntos</span>
+              </div>
+            ));
+          })()}
+        </div>
       </section>
 
       <section className="bg-white p-6 rounded-lg shadow">
