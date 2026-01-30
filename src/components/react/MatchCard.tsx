@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { calculateMatchMinute, formatMatchMinute } from '../../lib/match-time';
+import { getBasePath, getTeamImageUrl } from '../../lib/utils';
 import MatchLeaderboardModal from './MatchLeaderboardModal';
 import type { Match, Prediction, Group } from '../../lib/types';
 
@@ -55,10 +56,11 @@ export default function MatchCard({
 
   const team1Short = getTeamShort(match.team1, match.team1Short);
   const team2Short = getTeamShort(match.team2, match.team2Short);
-  
-  // Obtener base URL para las imágenes públicas
-  const baseUrl = (import.meta as any).env?.BASE_URL || '/';
-  const teamImageUrl = `${baseUrl}team-font.jpg`.replace(/\/+/g, '/');
+
+  const baseUrl = getBasePath() || '/';
+  const placeholderUrl = `${baseUrl}team-font.jpg`.replace(/\/+/g, '/');
+  const team1ImageUrl = getTeamImageUrl(match.team1Short, placeholderUrl);
+  const team2ImageUrl = getTeamImageUrl(match.team2Short, placeholderUrl);
 
   const formatDate = (timestamp: Timestamp | undefined): string => {
     if (!timestamp?.toDate) return '';
@@ -150,6 +152,7 @@ export default function MatchCard({
     <div className={`p-3 bg-white border rounded-lg ${
       match.status === 'live' ? 'border-green-300 shadow-sm' : 'border-gray-200'
     }`}>
+      {match.id}
       <div className="flex justify-between items-center mb-3">
         <span className="text-xs text-gray-500">{formatDate(match.scheduledTime)}</span>
         {getStatusBadge()}
@@ -165,13 +168,14 @@ export default function MatchCard({
 
       <div className="flex items-center justify-center gap-3">
         <div className="flex flex-col items-center">
-          <img 
-            src={teamImageUrl} 
+          <img
+            src={team1ImageUrl}
             alt={match.team1}
             className="w-12 h-12 object-contain mb-1"
+            onError={(e) => { e.currentTarget.src = placeholderUrl; }}
           />
           <span className="text-sm font-semibold text-gray-900">
-            {team1Short}
+            {match.team1}
           </span>
         </div>
 
@@ -262,13 +266,14 @@ export default function MatchCard({
         )}
 
         <div className="flex flex-col items-center">
-          <img 
-            src={teamImageUrl} 
+          <img
+            src={team2ImageUrl}
             alt={match.team2}
             className="w-12 h-12 object-contain mb-1"
+            onError={(e) => { e.currentTarget.src = placeholderUrl; }}
           />
           <span className="text-sm font-semibold text-gray-900">
-            {team2Short}
+            {match.team2}
           </span>
         </div>
       </div>
