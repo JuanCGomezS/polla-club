@@ -152,7 +152,6 @@ export default function MatchCard({
     <div className={`p-3 bg-white border rounded-lg ${
       match.status === 'live' ? 'border-green-300 shadow-sm' : 'border-gray-200'
     }`}>
-      {match.id}
       <div className="flex justify-between items-center mb-3">
         <span className="text-xs text-gray-500">{formatDate(match.scheduledTime)}</span>
         {getStatusBadge()}

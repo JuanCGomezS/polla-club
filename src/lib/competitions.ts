@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Competition } from './types';
+import type { Competition, CompetitionResult } from './types';
 
 /**
  * Obtiene todas las competiciones disponibles
@@ -68,5 +68,20 @@ export async function getCompetition(competitionId: string): Promise<Competition
     return { id: competitionDoc.id, ...competitionDoc.data() } as Competition;
   } catch (error: any) {
     throw new Error(error.message || 'Error al obtener competición');
+  }
+}
+
+/**
+ * Obtiene los resultados oficiales de una competición (ganador, subcampeón, etc.)
+ * Ruta: competitions/{competitionId}/results/main
+ */
+export async function getCompetitionResults(competitionId: string): Promise<CompetitionResult | null> {
+  try {
+    const resultsRef = doc(db, 'competitions', competitionId, 'results', 'main');
+    const resultsDoc = await getDoc(resultsRef);
+    if (!resultsDoc.exists()) return null;
+    return { id: resultsDoc.id, ...resultsDoc.data() } as CompetitionResult;
+  } catch (error: any) {
+    throw new Error(error.message || 'Error al obtener resultados de competición');
   }
 }

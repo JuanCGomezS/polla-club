@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getGroup } from '../../lib/groups';
 import { getMatchesByCompetition, filterUpcomingMatches, filterLiveMatches, filterFinishedMatches } from '../../lib/matches';
 import { getCurrentUser } from '../../lib/auth';
-import { getUserPrediction, savePrediction } from '../../lib/predictions';
+import { getUserPredictions, savePrediction, getUserPrediction } from '../../lib/predictions';
 import type { Group, Match, Prediction } from '../../lib/types';
 import MatchCard from './MatchCard';
+import BonusPredictionsForm from './BonusPredictionsForm';
+
+export type PredictionsSubTab = 'live' | 'upcoming' | 'finished' | 'bonus';
 
 interface PredictionsViewProps {
   groupId: string;
-  group?: Group; // Opcional: si viene del padre, no necesita cargarlo
+  group?: Group;
 }
 
 export default function PredictionsView({ groupId, group: groupProp }: PredictionsViewProps) {
@@ -59,33 +62,13 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     }
   };
 
-  const loadUserPredictions = async (matchesData: Match[], groupData: Group) => {
+  const loadUserPredictions = async (_matchesData: Match[], _groupData: Group) => {
     const user = getCurrentUser();
     if (!user) return;
-
-    const scheduledMatches = matchesData.filter((m) => m.status === 'scheduled');
-    const predictionPromises = scheduledMatches.map((match) =>
-      getUserPrediction(groupId, user.uid, match.id).then((p) => (p ? { matchId: match.id, prediction: p } : null))
-    );
-    const results = await Promise.all(predictionPromises);
-    const predictions: Record<string, Prediction> = {};
-    results.forEach((r) => {
-      if (r) predictions[r.matchId] = r.prediction;
-    });
-
-    const otherMatches = matchesData.filter((m) => m.status !== 'scheduled');
-    if (otherMatches.length > 0) {
-      const otherResults = await Promise.all(
-        otherMatches.map((match) =>
-          getUserPrediction(groupId, user.uid, match.id).then((p) => (p ? { matchId: match.id, prediction: p } : null))
-        )
-      );
-      otherResults.forEach((r) => {
-        if (r) predictions[r.matchId] = r.prediction;
-      });
-    }
-
-    setUserPredictions(predictions);
+    const all = await getUserPredictions(groupId, user.uid);
+    const byMatch: Record<string, Prediction> = {};
+    all.forEach((p) => { byMatch[p.matchId] = p; });
+    setUserPredictions(byMatch);
   };
 
   const handleSavePrediction = async (matchId: string, team1Score: number, team2Score: number) => {
@@ -138,73 +121,132 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
   const liveMatches = filterLiveMatches(matches);
   const finishedMatches = filterFinishedMatches(matches);
 
+  const defaultSubTab: PredictionsSubTab =
+    liveMatches.length > 0 ? 'live' : upcomingMatches.length > 0 ? 'upcoming' : finishedMatches.length > 0 ? 'finished' : 'bonus';
+  const [subTab, setSubTab] = useState<PredictionsSubTab>('upcoming');
+  const initialDefaultSet = useRef(false);
+
+  useEffect(() => {
+    if (matches.length > 0 && !initialDefaultSet.current) {
+      initialDefaultSet.current = true;
+      setSubTab(defaultSubTab);
+    }
+  }, [matches.length, defaultSubTab]);
+
+  useEffect(() => {
+    setSubTab((current) => {
+      if (current === 'live' && liveMatches.length === 0) return defaultSubTab;
+      if (current === 'upcoming' && upcomingMatches.length === 0) return defaultSubTab;
+      if (current === 'finished' && finishedMatches.length === 0) return defaultSubTab;
+      return current;
+    });
+  }, [liveMatches.length, upcomingMatches.length, finishedMatches.length, defaultSubTab]);
+
+  const subTabs: { id: PredictionsSubTab; label: string; count?: number }[] = [
+    ...(liveMatches.length > 0 ? [{ id: 'live' as const, label: 'Partidos en vivo', count: liveMatches.length }] : []),
+    { id: 'upcoming', label: 'Próximos partidos', count: upcomingMatches.length },
+    { id: 'finished', label: 'Partidos finalizados', count: finishedMatches.length },
+    { id: 'bonus', label: 'Pronósticos bonus' },
+  ];
+
   return (
-    <div className="space-y-6">
-      {liveMatches.length > 0 && (
+    <div className="space-y-4">
+      <nav className="flex flex-wrap gap-1 border-b border-gray-200 pb-2">
+        {subTabs.map(({ id, label, count }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setSubTab(id)}
+            className={`px-3 py-2 text-sm font-medium rounded-t-lg transition ${
+              subTab === id
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            {label}
+            {count != null && count > 0 && (
+              <span className="ml-1.5 text-gray-500 font-normal">({count})</span>
+            )}
+          </button>
+        ))}
+      </nav>
+
+      {subTab === 'live' && (
         <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-3">Partidos en Curso</h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {liveMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                groupId={groupId}
-                group={group!}
-                userPrediction={userPredictions[match.id]}
-                onSavePrediction={handleSavePrediction}
-                isSaving={savingPrediction === match.id}
-                canEdit={false}
-              />
-            ))}
-          </div>
+          {liveMatches.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {liveMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  groupId={groupId}
+                  group={group!}
+                  userPrediction={userPredictions[match.id]}
+                  onSavePrediction={handleSavePrediction}
+                  isSaving={savingPrediction === match.id}
+                  canEdit={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-600">No hay partidos en vivo.</p>
+            </div>
+          )}
         </section>
       )}
 
-      {upcomingMatches.length > 0 && (
+      {subTab === 'upcoming' && (
         <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-3">Proximos Partidos</h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                groupId={groupId}
-                group={group!}
-                userPrediction={userPredictions[match.id]}
-                onSavePrediction={handleSavePrediction}
-                isSaving={savingPrediction === match.id}
-                canEdit={true}
-              />
-            ))}
-          </div>
+          {upcomingMatches.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {upcomingMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  groupId={groupId}
+                  group={group!}
+                  userPrediction={userPredictions[match.id]}
+                  onSavePrediction={handleSavePrediction}
+                  isSaving={savingPrediction === match.id}
+                  canEdit={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-600">No hay próximos partidos.</p>
+            </div>
+          )}
         </section>
       )}
 
-      {finishedMatches.length > 0 && (
+      {subTab === 'finished' && (
         <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-3">Partidos Finalizados</h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {finishedMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                groupId={groupId}
-                group={group!}
-                userPrediction={userPredictions[match.id]}
-                onSavePrediction={handleSavePrediction}
-                isSaving={false}
-                canEdit={false}
-              />
-            ))}
-          </div>
+          {finishedMatches.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {finishedMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  groupId={groupId}
+                  group={group!}
+                  userPrediction={userPredictions[match.id]}
+                  onSavePrediction={handleSavePrediction}
+                  isSaving={false}
+                  canEdit={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-600">No hay partidos finalizados.</p>
+            </div>
+          )}
         </section>
       )}
 
-      {upcomingMatches.length === 0 && liveMatches.length === 0 && finishedMatches.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">No hay partidos disponibles para esta competición.</p>
-        </div>
-      )}
+      {subTab === 'bonus' && <BonusPredictionsForm groupId={groupId} group={group} />}
     </div>
   );
 }
