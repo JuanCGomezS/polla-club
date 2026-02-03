@@ -19,7 +19,7 @@ interface PredictionsViewProps {
 export default function PredictionsView({ groupId, group: groupProp }: PredictionsViewProps) {
   const [group, setGroup] = useState<Group | null>(groupProp || null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(!groupProp); // Si ya viene el grupo, no mostrar loading
+  const [loading, setLoading] = useState(!groupProp);
   const [error, setError] = useState('');
   const [userPredictions, setUserPredictions] = useState<Record<string, Prediction>>({});
   const [savingPrediction, setSavingPrediction] = useState<string | null>(null);
@@ -74,7 +74,6 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       }
 
       setGroup(groupData);
-      // No cargar matches aquí, el useEffect con onSnapshot lo hará
       await loadUserPredictions([], groupData);
       setLoading(false);
     } catch (err: unknown) {
