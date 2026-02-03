@@ -52,8 +52,19 @@ export async function savePrediction(
   team2Score: number
 ): Promise<void> {
   try {
+    // Obtener el grupo para acceder a competitionId
+    const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    
+    if (!groupDoc.exists()) {
+      throw new Error('Grupo no encontrado');
+    }
+    
+    const group = groupDoc.data() as any;
+    const competitionId = group.competitionId;
+    
     // Verificar que el partido esté en estado "scheduled"
-    const matchRef = doc(db, 'matches', matchId);
+    const matchRef = doc(db, 'competitions', competitionId, 'matches', matchId);
     const matchDoc = await getDoc(matchRef);
     
     if (!matchDoc.exists()) {

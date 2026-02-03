@@ -1,11 +1,13 @@
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
-import { getGroup } from '../../lib/groups';
-import { getMatchesByCompetition, filterUpcomingMatches, filterLiveMatches, filterFinishedMatches } from '../../lib/matches';
 import { getCurrentUser } from '../../lib/auth';
-import { getUserPredictions, savePrediction, getUserPrediction } from '../../lib/predictions';
+import { db } from '../../lib/firebase';
+import { getGroup } from '../../lib/groups';
+import { filterFinishedMatches, filterLiveMatches, filterUpcomingMatches } from '../../lib/matches';
+import { getUserPrediction, getUserPredictions, savePrediction } from '../../lib/predictions';
 import type { Group, Match, Prediction } from '../../lib/types';
-import MatchCard from './MatchCard';
 import BonusPredictionsForm from './BonusPredictionsForm';
+import MatchCard from './MatchCard';
 
 export type PredictionsSubTab = 'live' | 'upcoming' | 'finished' | 'bonus';
 
@@ -26,13 +28,33 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     loadData();
   }, [groupId, groupProp?.id]);
 
+  useEffect(() => {
+    if (!group?.competitionId) return;
+
+    const matchesRef = collection(db, 'competitions', group.competitionId, 'matches');
+    const unsubscribe = onSnapshot(
+      matchesRef,
+      (snapshot) => {
+        const updatedMatches: Match[] = [];
+        snapshot.forEach((doc) => {
+          updatedMatches.push({ id: doc.id, ...doc.data() } as Match);
+        });
+        setMatches(updatedMatches);
+      },
+      (err) => {
+        console.error('Error en listener de partidos:', err);
+        setError('Error al actualizar partidos en tiempo real');
+      }
+    );
+
+    return () => unsubscribe();
+  }, [group?.competitionId]);
+
   const loadData = async () => {
     try {
       if (groupProp) {
         setGroup(groupProp);
-        const matchesData = await getMatchesByCompetition(groupProp.competitionId);
-        setMatches(matchesData);
-        await loadUserPredictions(matchesData, groupProp);
+        await loadUserPredictions([], groupProp);
         setLoading(false);
         return;
       }
@@ -51,13 +73,12 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
         return;
       }
 
-      const matchesData = await getMatchesByCompetition(groupData.competitionId);
       setGroup(groupData);
-      setMatches(matchesData);
-      await loadUserPredictions(matchesData, groupData);
+      // No cargar matches aquí, el useEffect con onSnapshot lo hará
+      await loadUserPredictions([], groupData);
+      setLoading(false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar datos');
-    } finally {
       setLoading(false);
     }
   };

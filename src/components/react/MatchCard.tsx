@@ -112,29 +112,29 @@ export default function MatchCard({
 
   const isMatchStarted = match.status === 'live' || match.status === 'finished';
   const result = match.result && match.result !== null ? match.result : undefined;
-  
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const extraTime1 = match.extraTime1 ?? 0;
   const extraTime2 = match.extraTime2 ?? 0;
   const halftimeDuration = match.halftimeDuration ?? 15;
-  
-  const calculatedMinute = match.status === 'live' 
+
+  const calculatedMinute = match.status === 'live'
     ? calculateMatchMinute(match.scheduledTime, match.startTime, extraTime1, extraTime2, currentTime, halftimeDuration)
     : null;
-  
+
   useEffect(() => {
     if (match.status === 'live') {
       setCurrentTime(new Date());
-      
+
       const interval = setInterval(() => {
         setCurrentTime(new Date());
       }, 1000);
-      
+
       return () => clearInterval(interval);
     }
   }, [match.status, match.scheduledTime, match.startTime]);
-  
-  const displayMinute = match.status === 'live' 
+
+  const displayMinute = match.status === 'live'
     ? calculatedMinute?.minute ?? null
     : null;
   const displayExtraTime = match.status === 'live'
@@ -149,9 +149,8 @@ export default function MatchCard({
   const minuteStatus = calculatedMinute?.status;
 
   return (
-    <div className={`p-3 bg-white border rounded-lg ${
-      match.status === 'live' ? 'border-green-300 shadow-sm' : 'border-gray-200'
-    }`}>
+    <div className={`p-3 bg-white border rounded-lg ${match.status === 'live' ? 'border-green-300 shadow-sm' : 'border-gray-200'
+      }`}>
       <div className="flex justify-between items-center mb-3">
         <span className="text-xs text-gray-500">{formatDate(match.scheduledTime)}</span>
         {getStatusBadge()}
@@ -179,40 +178,34 @@ export default function MatchCard({
         </div>
 
         {isMatchStarted && result ? (
-          <div 
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-3 py-2 transition group"
-            onClick={() => setIsLeaderboardOpen(true)}
-            title="Click para ver tabla de posiciones"
-          >
-            <div className="text-center min-w-[60px]">
-              <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
-                {result.team1Score}
-              </span>
-              {userPrediction && (
-                <span className="text-sm text-gray-500 ml-1">
-                  ({userPrediction.team1Score})
+          <div>
+            <div className="flex items-center rounded-lg px-3 py-2 ">
+              <div className="text-center min-w-[60px]">
+                <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
+                  {result.team1Score}
                 </span>
-              )}
-            </div>
-            <span className="text-gray-400 font-medium">vs</span>
-            <div className="text-center min-w-[60px]">
-              <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
-                {result.team2Score}
-              </span>
-              {userPrediction && (
-                <span className="text-sm text-gray-500 ml-1">
-                  ({userPrediction.team2Score})
+                {userPrediction && (
+                  <span className="text-sm text-gray-500 ml-1">
+                    ({userPrediction.team1Score})
+                  </span>
+                )}
+              </div>
+              <span className="text-gray-400 font-medium">vs</span>
+              <div className="text-center min-w-[60px]">
+                <span className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">
+                  {result.team2Score}
                 </span>
-              )}
+                {userPrediction && (
+                  <span className="text-sm text-gray-500 ml-1">
+                    ({userPrediction.team2Score})
+                  </span>
+                )}
+              </div>
             </div>
-            <svg 
-              className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition ml-1" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <div className="text-sm text-blue-600 mt-1 text-center cursor-pointer" onClick={() => setIsLeaderboardOpen(true)}
+              title="Click para ver tabla de posiciones">
+              <h3>Mostrar resultados</h3>
+            </div>
           </div>
         ) : canEdit && isEditing ? (
           <>

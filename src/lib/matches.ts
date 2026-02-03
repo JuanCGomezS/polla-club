@@ -7,10 +7,9 @@ import type { Match, MatchStatus } from './types';
  */
 export async function getMatchesByCompetition(competitionId: string): Promise<Match[]> {
   try {
-    const matchesRef = collection(db, 'matches');
+    const matchesRef = collection(db, 'competitions', competitionId, 'matches');
     const matchesQuery = query(
       matchesRef,
-      where('competitionId', '==', competitionId),
       orderBy('scheduledTime', 'asc')
     );
 
@@ -26,10 +25,9 @@ export async function getMatchesByCompetition(competitionId: string): Promise<Ma
     // Si falla por falta de índice, intentar sin orderBy
     if (error.code === 'failed-precondition' || error.message?.includes('index')) {
       try {
-        const matchesRef = collection(db, 'matches');
+        const matchesRef = collection(db, 'competitions', competitionId, 'matches');
         const matchesQuery = query(
-          matchesRef,
-          where('competitionId', '==', competitionId)
+          matchesRef
         );
 
         const snapshot = await getDocs(matchesQuery);
@@ -63,10 +61,9 @@ export async function getMatchesByCompetitionAndStatus(
   status: MatchStatus
 ): Promise<Match[]> {
   try {
-    const matchesRef = collection(db, 'matches');
+    const matchesRef = collection(db, 'competitions', competitionId, 'matches');
     const matchesQuery = query(
       matchesRef,
-      where('competitionId', '==', competitionId),
       where('status', '==', status),
       orderBy('scheduledTime', 'asc')
     );
@@ -81,10 +78,9 @@ export async function getMatchesByCompetitionAndStatus(
     return result;
   } catch (error: any) {
     try {
-      const matchesRef = collection(db, 'matches');
+      const matchesRef = collection(db, 'competitions', competitionId, 'matches');
       const matchesQuery = query(
         matchesRef,
-        where('competitionId', '==', competitionId),
         where('status', '==', status)
       );
 
@@ -111,9 +107,9 @@ export async function getMatchesByCompetitionAndStatus(
 /**
  * Obtiene un partido por ID
  */
-export async function getMatch(matchId: string): Promise<Match | null> {
+export async function getMatch(competitionId: string, matchId: string): Promise<Match | null> {
   try {
-    const matchRef = doc(db, 'matches', matchId);
+    const matchRef = doc(db, 'competitions', competitionId, 'matches', matchId);
     const matchDoc = await getDoc(matchRef);
 
     if (!matchDoc.exists()) {

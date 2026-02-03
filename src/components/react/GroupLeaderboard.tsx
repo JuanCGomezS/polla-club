@@ -40,10 +40,9 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
   }, [groupId, allUserIds.join(',')]);
 
   useEffect(() => {
-    const matchesRef = collection(db, 'matches');
+    const matchesRef = collection(db, 'competitions', group.competitionId, 'matches');
     const matchesQuery = query(
-      matchesRef,
-      where('competitionId', '==', group.competitionId)
+      matchesRef
     );
 
     const unsubscribeMatches = onSnapshot(
