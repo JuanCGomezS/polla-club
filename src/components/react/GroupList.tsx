@@ -114,7 +114,7 @@ export default function GroupList() {
         {groups.map((group) => (
           <a
             key={group.id}
-            href={getRoute(`/groups/${group.id}`)}
+            href={getRoute(`/groups/dashboard?groupId=${group.id}&tab=predictions`)}
             className="block p-6 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">

@@ -1,3 +1,16 @@
+const FIFA_FLAGS_BASE = 'https://api.fifa.com/api/v3/picture/flags-sq-2';
+
+/**
+ * URL de bandera FIFA usando el código corto del equipo (team1Short/team2Short, ej. MEX, USA, COL).
+ * Si no hay código, devuelve el fallback (ej. imagen genérica).
+ */
+export function getTeamImageUrl(shortCode: string | undefined, fallback: string): string {
+  if (shortCode && shortCode.trim()) {
+    return `${FIFA_FLAGS_BASE}/${encodeURIComponent(shortCode.trim().toUpperCase())}`;
+  }
+  return fallback;
+}
+
 /**
  * Obtiene el base path configurado en Astro
  */

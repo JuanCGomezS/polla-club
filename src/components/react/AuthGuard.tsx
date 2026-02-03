@@ -66,10 +66,5 @@ export default function AuthGuard({
     );
   }
 
-  if (!requireAuth && user) {
-    // Si no requiere auth pero el usuario está autenticado, mostrar contenido
-    return <>{children}</>;
-  }
-
   return <>{children}</>;
 }

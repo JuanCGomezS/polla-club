@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { createGroup } from '../../lib/groups';
-import { canUserCreateGroups } from '../../lib/groups';
+import { createGroup, canUserCreateGroups } from '../../lib/groups';
 import { getCompetitions } from '../../lib/competitions';
 import { getCurrentUser } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';
@@ -17,9 +16,14 @@ export default function CreateGroupForm() {
   const [formData, setFormData] = useState({
     competitionId: '',
     name: '',
-    pointsExactScore: 5,
-    pointsWinner: 2,
-    pointsGoalDifference: 1
+    pointsExactScore: 3,
+    pointsWinner: 1,
+    pointsGoalDifference: 1,
+    pointsWinnerBonus: 0,
+    pointsRunnerUp: 0,
+    pointsThirdPlace: 0,
+    pointsTopScorer: 0,
+    pointsTopAssister: 0
   });
 
   useEffect(() => {
@@ -80,7 +84,12 @@ export default function CreateGroupForm() {
       const settings: Group['settings'] = {
         pointsExactScore: formData.pointsExactScore,
         pointsWinner: formData.pointsWinner,
-        pointsGoalDifference: formData.pointsGoalDifference > 0 ? formData.pointsGoalDifference : undefined
+        ...(formData.pointsGoalDifference > 0 && { pointsGoalDifference: formData.pointsGoalDifference }),
+        ...(formData.pointsWinnerBonus > 0 && { pointsWinnerBonus: formData.pointsWinnerBonus }),
+        ...(formData.pointsRunnerUp > 0 && { pointsRunnerUp: formData.pointsRunnerUp }),
+        ...(formData.pointsThirdPlace > 0 && { pointsThirdPlace: formData.pointsThirdPlace }),
+        ...(formData.pointsTopScorer > 0 && { pointsTopScorer: formData.pointsTopScorer }),
+        ...(formData.pointsTopAssister > 0 && { pointsTopAssister: formData.pointsTopAssister })
       };
 
       const { groupId } = await createGroup(
@@ -91,7 +100,7 @@ export default function CreateGroupForm() {
       );
 
       // Redirigir al grupo creado
-      window.location.href = getRoute(`/groups/${groupId}`);
+      window.location.href = getRoute(`/groups/dashboard?groupId=${groupId}&tab=predictions`);
     } catch (err: any) {
       setError(err.message || 'Error al crear grupo');
       setSubmitting(false);
@@ -225,6 +234,95 @@ export default function CreateGroupForm() {
                 max="5"
               />
               <p className="mt-1 text-xs text-gray-500">Puntos adicionales por acertar la diferencia de goles (0 para desactivar)</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pronósticos Bonus (Opcional)</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Configura los puntos para pronósticos bonus. Si dejas el valor en 0, esa opción no estará disponible para los participantes.
+          </p>
+          
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="pointsWinnerBonus" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos por Acertar Ganador de la Competición
+              </label>
+              <input
+                type="number"
+                id="pointsWinnerBonus"
+                value={formData.pointsWinnerBonus}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsWinnerBonus: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="50"
+              />
+              <p className="mt-1 text-xs text-gray-500">Puntos por acertar el ganador final de la competición (0 para desactivar)</p>
+            </div>
+
+            <div>
+              <label htmlFor="pointsRunnerUp" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos por Acertar Segundo Lugar
+              </label>
+              <input
+                type="number"
+                id="pointsRunnerUp"
+                value={formData.pointsRunnerUp}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsRunnerUp: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="50"
+              />
+              <p className="mt-1 text-xs text-gray-500">Puntos por acertar el segundo lugar (0 para desactivar)</p>
+            </div>
+
+            <div>
+              <label htmlFor="pointsThirdPlace" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos por Acertar Tercer Lugar
+              </label>
+              <input
+                type="number"
+                id="pointsThirdPlace"
+                value={formData.pointsThirdPlace}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsThirdPlace: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="50"
+              />
+              <p className="mt-1 text-xs text-gray-500">Puntos por acertar el tercer lugar (0 para desactivar)</p>
+            </div>
+
+            <div>
+              <label htmlFor="pointsTopScorer" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos por Acertar Máximo Goleador
+              </label>
+              <input
+                type="number"
+                id="pointsTopScorer"
+                value={formData.pointsTopScorer}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopScorer: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="50"
+              />
+              <p className="mt-1 text-xs text-gray-500">Puntos por acertar el máximo goleador (0 para desactivar)</p>
+            </div>
+
+            <div>
+              <label htmlFor="pointsTopAssister" className="block text-sm font-medium text-gray-700 mb-1">
+                Puntos por Acertar Máximo Asistidor
+              </label>
+              <input
+                type="number"
+                id="pointsTopAssister"
+                value={formData.pointsTopAssister}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopAssister: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="50"
+              />
+              <p className="mt-1 text-xs text-gray-500">Puntos por acertar el máximo asistidor (0 para desactivar)</p>
             </div>
           </div>
         </div>

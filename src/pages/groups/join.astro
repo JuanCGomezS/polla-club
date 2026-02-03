@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/react/AuthGuard';
+import JoinGroupForm from '../../components/react/JoinGroupForm';
+---
+
+<Layout title="Unirse a Grupo - PollaClub" showHeader={true}>
+  <AuthGuard client:load>
+    <JoinGroupForm client:load />
+  </AuthGuard>
+</Layout>

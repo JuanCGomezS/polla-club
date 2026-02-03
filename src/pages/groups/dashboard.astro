@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/react/AuthGuard';
+import GroupDashboard from '../../components/react/GroupDashboard';
+---
+
+<Layout title="Dashboard - PollaClub" showHeader={true}>
+  <AuthGuard client:load>
+    <GroupDashboard client:load />
+  </AuthGuard>
+</Layout>

@@ -1,0 +1,190 @@
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { batchGetUsers, getCurrentUser } from '../../lib/auth';
+import { db } from '../../lib/firebase';
+import type { MatchLeaderboardEntry } from '../../lib/points';
+import { calculatePredictionPoints } from '../../lib/points';
+import type { Group, Match, Prediction } from '../../lib/types';
+
+interface MatchLeaderboardProps {
+  groupId: string;
+  match: Match;
+  group: Group;
+}
+
+export default function MatchLeaderboard({ groupId, match, group }: MatchLeaderboardProps) {
+  const [leaderboard, setLeaderboard] = useState<MatchLeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!match.result) {
+      setLoading(false);
+      return;
+    }
+
+    const predictionsRef = collection(db, 'groups', groupId, 'predictions');
+    const predictionsQuery = query(
+      predictionsRef,
+      where('matchId', '==', match.id)
+    );
+
+    const unsubscribe = onSnapshot(
+      predictionsQuery,
+      async (snapshot) => {
+        try {
+          const predictions: Prediction[] = [];
+          snapshot.forEach((doc) => {
+            predictions.push({ id: doc.id, ...doc.data() } as Prediction);
+          });
+
+          if (predictions.length === 0) {
+            setLeaderboard([]);
+            setLoading(false);
+            return;
+          }
+
+          const userIds = [...new Set(predictions.map(p => p.userId))];
+          const usersMap = await batchGetUsers(userIds);
+
+          const entries: MatchLeaderboardEntry[] = predictions.map((prediction) => {
+            let points = prediction.points || 0;
+            
+            if (!prediction.points && match.result) {
+              const calculated = calculatePredictionPoints(
+                prediction,
+                match.result,
+                group.settings
+              );
+              points = calculated.points;
+            }
+
+            const user = usersMap.get(prediction.userId);
+            return {
+              userId: prediction.userId,
+              userName: user?.displayName || `Usuario ${prediction.userId.substring(0, 8)}...`,
+              prediction,
+              points,
+              rank: 0
+            };
+          });
+
+          entries.sort((a, b) => {
+            if (b.points !== a.points) {
+              return b.points - a.points;
+            }
+            return a.userName.localeCompare(b.userName);
+          });
+
+          entries.forEach((entry, index) => {
+            entry.rank = index + 1;
+            if (index > 0 && entry.points === entries[index - 1].points) {
+              entry.rank = entries[index - 1].rank;
+            }
+          });
+
+          setLeaderboard(entries);
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err.message : 'Error al cargar tabla');
+        } finally {
+          setLoading(false);
+        }
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [groupId, match.id, match.result, group.settings]);
+
+  if (!match.result) {
+    return (
+      <div className="text-sm text-gray-500 text-center py-4">
+        Esperando resultado del partido...
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto" />
+        <p className="mt-2 text-sm text-gray-600">Cargando tabla...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-sm text-red-600 text-center py-4">
+        {error}
+      </div>
+    );
+  }
+
+  if (leaderboard.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 text-center py-4">
+        No hay pronósticos para este partido
+      </div>
+    );
+  }
+
+  const currentUserId = getCurrentUser()?.uid;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              #
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Participante
+            </th>
+            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Pronóstico
+            </th>
+            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Puntos
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {leaderboard.map((entry) => {
+            const isCurrentUser = currentUserId === entry.userId;
+            const isExact = entry.prediction.team1Score === match.result!.team1Score &&
+                           entry.prediction.team2Score === match.result!.team2Score;
+
+            return (
+              <tr
+                key={entry.userId}
+                className={entry.rank === 1 ? 'bg-yellow-50' : ''}
+              >
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                  {entry.rank}
+                </td>
+                <td className={`px-3 py-2 whitespace-nowrap text-sm ${isCurrentUser ? 'font-bold text-gray-900' : 'text-gray-900'}`}>
+                  {entry.userName}
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-center">
+                  <span className={isExact ? 'font-bold text-green-600' : ''}>
+                    {entry.prediction.team1Score} - {entry.prediction.team2Score}
+                  </span>
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap text-sm text-center">
+                  <span className={`font-semibold ${entry.points > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                    {entry.points}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

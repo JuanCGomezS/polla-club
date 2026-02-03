@@ -1,17 +1,16 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc,
-  query, 
-  where,
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
   serverTimestamp,
-  Timestamp
+  setDoc,
+  updateDoc,
+  where
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Prediction, Match } from './types';
+import type { Match, Prediction } from './types';
 
 /**
  * Obtiene el pronóstico de un usuario para un partido específico
@@ -53,8 +52,19 @@ export async function savePrediction(
   team2Score: number
 ): Promise<void> {
   try {
+    // Obtener el grupo para acceder a competitionId
+    const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    
+    if (!groupDoc.exists()) {
+      throw new Error('Grupo no encontrado');
+    }
+    
+    const group = groupDoc.data() as any;
+    const competitionId = group.competitionId;
+    
     // Verificar que el partido esté en estado "scheduled"
-    const matchRef = doc(db, 'matches', matchId);
+    const matchRef = doc(db, 'competitions', competitionId, 'matches', matchId);
     const matchDoc = await getDoc(matchRef);
     
     if (!matchDoc.exists()) {
@@ -86,10 +96,7 @@ export async function savePrediction(
       // Crear nuevo pronóstico
       const predictionsRef = collection(db, 'groups', groupId, 'predictions');
       const predictionRef = doc(predictionsRef);
-      await setDoc(predictionRef, {
-        id: predictionRef.id,
-        ...predictionData
-      });
+      await setDoc(predictionRef, predictionData);
     }
   } catch (error: any) {
     throw new Error(error.message || 'Error al guardar pronóstico');
