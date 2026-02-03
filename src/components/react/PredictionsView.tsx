@@ -37,7 +37,8 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       (snapshot) => {
         const updatedMatches: Match[] = [];
         snapshot.forEach((doc) => {
-          updatedMatches.push({ id: doc.id, ...doc.data() } as Match);
+          const matchData = doc.data();
+          updatedMatches.push({ ...matchData, id: doc.id } as Match);
         });
         setMatches(updatedMatches);
       },
