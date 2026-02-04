@@ -28,7 +28,7 @@ export default function GroupList() {
         getUserGroups(user.uid),
         canUserCreateGroups(user.uid)
       ]);
-      
+
       setGroups(userGroups);
       setCanCreate(hasPermission);
     } catch (err: any) {
@@ -63,7 +63,7 @@ export default function GroupList() {
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">No tienes grupos aún</h2>
           <p className="text-gray-600 mb-6">
-            {canCreate 
+            {canCreate
               ? 'Crea un grupo o únete a uno existente usando un código'
               : 'Únete a un grupo existente usando un código'}
           </p>
@@ -90,24 +90,22 @@ export default function GroupList() {
 
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Mis Grupos</h1>
-        <div className="space-x-2">
-          {canCreate && (
-            <a
-              href={getRoute('/groups/create')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-            >
-              Crear Grupo
-            </a>
-          )}
+      <h1 className="text-3xl font-bold text-gray-900 my-4">Mis Grupos</h1>
+      <div className="flex justify-end items-center mb-6 space-x-2">
+        {canCreate && (
           <a
-            href={getRoute('/groups/join')}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
+            href={getRoute('/groups/create')}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
           >
-            Unirse
+            Crear Grupo
           </a>
-        </div>
+        )}
+        <a
+          href={getRoute('/groups/join')}
+          className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
+        >
+          Unirse
+        </a>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
