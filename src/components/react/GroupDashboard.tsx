@@ -5,6 +5,7 @@ import { getRoute } from '../../lib/utils';
 import PredictionsView from './PredictionsView';
 import GroupLeaderboard from './GroupLeaderboard';
 import GroupSettings from './GroupSettings';
+import NotificationButton from './NotificationButton';
 import type { Group } from '../../lib/types';
 
 // Función para leer query params (se ejecuta inmediatamente, fuera del componente)
@@ -138,7 +139,8 @@ export default function GroupDashboard() {
               Código: <span className="font-mono font-semibold">{group.code}</span>
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-3">
+            <NotificationButton />
             {group.isActive ? (
               <span className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">Activo</span>
             ) : (

@@ -91,7 +91,7 @@ export default function GroupList() {
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6">
       <h1 className="text-3xl font-bold text-gray-900 my-4">Mis Grupos</h1>
-      <div className="flex justify-end items-center mb-6 space-x-2">
+      <div className="flex justify-between items-center mb-6 space-x-2">
         {canCreate && (
           <a
             href={getRoute('/groups/create')}

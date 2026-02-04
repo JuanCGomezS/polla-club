@@ -28,5 +28,29 @@ const baseUrl = import.meta.env.BASE_URL;
       <slot />
     </main>
     <Footer />
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+          try {
+            const base = document.documentElement.dataset.base || '/';
+            const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+            const swPath = `${normalizedBase}firebase-messaging-sw.js`;
+
+            console.log('📋 Intentando registrar Service Worker en:', swPath);
+
+            const registration = await navigator.serviceWorker.register(swPath, {
+              scope: normalizedBase
+            });
+
+            console.log('✅ Service Worker registrado:', registration.scope);
+          } catch (error) {
+            console.error('❌ Error registrando Service Worker:', error);
+          }
+        });
+      } else {
+        console.log('Service Worker no soportado en este navegador');
+      }
+    </script>
   </body>
 </html>
