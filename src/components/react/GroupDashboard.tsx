@@ -6,6 +6,7 @@ import PredictionsView from './PredictionsView';
 import GroupLeaderboard from './GroupLeaderboard';
 import GroupSettings from './GroupSettings';
 import NotificationButton from './NotificationButton';
+import DebugConsole from './DebugConsole';
 import type { Group } from '../../lib/types';
 
 // Función para leer query params (se ejecuta inmediatamente, fuera del componente)
@@ -213,6 +214,8 @@ export default function GroupDashboard() {
           <GroupSettings groupId={groupId} group={group} />
         )}
       </div>
+      
+      <DebugConsole />
     </div>
   );
 }

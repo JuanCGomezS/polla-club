@@ -41,13 +41,16 @@ export async function requestNotificationPermission(): Promise<string | null> {
         const normalizedBase = base.endsWith('/') ? base : `${base}/`;
         const swPath = `${normalizedBase}firebase-messaging-sw.js`;
         
+        console.log('🔧 DEBUG: Intentando registrar SW en:', swPath);
+        console.log('🔧 DEBUG: Scope:', normalizedBase);
+        
         await navigator.serviceWorker.register(swPath, {
           scope: normalizedBase
         });
         console.log('✅ Service Worker pre-registrado para Firebase Messaging');
       } catch (swError) {
-        console.warn('⚠️ Error pre-registrando Service Worker:', swError);
-        // Continuar de todas formas
+        console.error('❌ Error pre-registrando Service Worker:', swError);
+        throw new Error(`Service Worker falló: ${swError}`);
       }
     }
 
@@ -70,33 +73,46 @@ export async function requestNotificationPermission(): Promise<string | null> {
 
     // Obtener token FCM
     const vapidKey = import.meta.env.PUBLIC_FIREBASE_VAPID_KEY;
+    console.log('🔧 DEBUG: VAPID key presente?', !!vapidKey);
+    
     if (!vapidKey) {
       console.error('PUBLIC_FIREBASE_VAPID_KEY no está configurada');
-      return null;
+      throw new Error('VAPID key no configurada');
     }
 
+    console.log('🔧 DEBUG: Esperando Service Worker ready...');
+    const swRegistration = await navigator.serviceWorker.ready;
+    console.log('🔧 DEBUG: Service Worker ready:', swRegistration.scope);
+
+    console.log('🔧 DEBUG: Solicitando token FCM...');
     const token = await getToken(messagingInstance, {
       vapidKey: vapidKey,
-      serviceWorkerRegistration: await navigator.serviceWorker.ready
+      serviceWorkerRegistration: swRegistration
     });
 
     if (!token) {
       console.error('No se pudo obtener el token FCM');
-      return null;
+      throw new Error('Token FCM no obtenido');
     }
 
     console.log('✅ Token FCM obtenido:', token.substring(0, 20) + '...');
 
     // Guardar token en Firestore
     const user = auth.currentUser;
+    console.log('🔧 DEBUG: Usuario actual?', !!user, user?.uid);
+    
     if (user) {
+      console.log('🔧 DEBUG: Guardando token en Firestore...');
       await saveTokenToFirestore(user.uid, token);
+      console.log('✅ Token guardado exitosamente en Firestore');
+    } else {
+      throw new Error('Usuario no autenticado');
     }
 
     return token;
   } catch (error) {
-    console.error('Error al solicitar permiso de notificaciones:', error);
-    return null;
+    console.error('❌ Error al solicitar permiso de notificaciones:', error);
+    throw error; // Re-throw para que el componente lo capture
   }
 }
 
