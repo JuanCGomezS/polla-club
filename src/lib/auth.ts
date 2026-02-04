@@ -34,6 +34,8 @@ export async function registerUser(
       email,
       groups: [],
       canCreateGroups: false,
+      fcmTokens: [],
+      lastTokenUpdate: null,
       createdAt: serverTimestamp()
     });
 

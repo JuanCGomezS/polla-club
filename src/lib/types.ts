@@ -93,7 +93,9 @@ export interface User {
   displayName: string;
   email: string;
   groups: string[];
-  canCreateGroups: boolean; // Permiso para crear grupos (habilitado manualmente por admin)
+  canCreateGroups: boolean;
+  fcmTokens?: string[];
+  lastTokenUpdate?: Date;
   createdAt: Timestamp;
 }
 
