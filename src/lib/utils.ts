@@ -1,14 +1,22 @@
 const FIFA_FLAGS_BASE = 'https://api.fifa.com/api/v3/picture/flags-sq-2';
+const BETPLAY_FLAGS_BASE = 'https://static.prisa.com/aside/resizer/resize/img/sports/football/teams/XXXX.png?width=44&height=44';
 
 /**
- * URL de bandera FIFA usando el código corto del equipo (team1Short/team2Short, ej. MEX, USA, COL).
- * Si no hay código, devuelve el fallback (ej. imagen genérica).
+ * Retorna todas las URLs disponibles para un escudo de equipo (útil para <picture> tags)
  */
-export function getTeamImageUrl(shortCode: string | undefined, fallback: string): string {
-  if (shortCode && shortCode.trim()) {
-    return `${FIFA_FLAGS_BASE}/${encodeURIComponent(shortCode.trim().toUpperCase())}`;
+export function getTeamImageUrls(shortCode: string | undefined): string[] {
+  if (!shortCode || !shortCode.trim()) {
+    return [];
   }
-  return fallback;
+
+  const cleanCode = shortCode.trim().toUpperCase();
+  const baseUrl = getBasePath() || '/';
+  
+  return [
+    `${FIFA_FLAGS_BASE}/${encodeURIComponent(cleanCode)}`,
+    BETPLAY_FLAGS_BASE.replace('XXXX', cleanCode),
+    `${baseUrl}team-font.jpg`.replace(/\/+/g, '/')
+  ];
 }
 
 /**

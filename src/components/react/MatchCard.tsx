@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { calculateMatchMinute, formatMatchMinute } from '../../lib/match-time';
-import { getBasePath, getTeamImageUrl } from '../../lib/utils';
+import { getBasePath, getTeamImageUrls } from '../../lib/utils';
 import MatchLeaderboardModal from './MatchLeaderboardModal';
 import type { Match, Prediction, Group } from '../../lib/types';
 
@@ -30,6 +30,8 @@ export default function MatchCard({
   const [team2Score, setTeam2Score] = useState<string>(
     userPrediction?.team2Score.toString() || ''
   );
+  const [team1ImageIndex, setTeam1ImageIndex] = useState(0);
+  const [team2ImageIndex, setTeam2ImageIndex] = useState(0);
 
   const [isEditing, setIsEditing] = useState(!userPrediction && canEdit);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
@@ -59,8 +61,8 @@ export default function MatchCard({
 
   const baseUrl = getBasePath() || '/';
   const placeholderUrl = `${baseUrl}team-font.jpg`.replace(/\/+/g, '/');
-  const team1ImageUrl = getTeamImageUrl(match.team1Short, placeholderUrl);
-  const team2ImageUrl = getTeamImageUrl(match.team2Short, placeholderUrl);
+  const team1ImageUrls = getTeamImageUrls(match.team1Short);
+  const team2ImageUrls = getTeamImageUrls(match.team2Short);
 
   const formatDate = (timestamp: Timestamp | undefined): string => {
     if (!timestamp?.toDate) return '';
@@ -167,10 +169,16 @@ export default function MatchCard({
       <div className="flex items-center justify-center gap-3">
         <div className="flex flex-col items-center">
           <img
-            src={team1ImageUrl}
+            src={team1ImageUrls[team1ImageIndex] || placeholderUrl}
             alt={match.team1}
             className="w-12 h-12 object-contain mb-1"
-            onError={(e) => { e.currentTarget.src = placeholderUrl; }}
+            onError={() => {
+              if (team1ImageIndex < team1ImageUrls.length - 1) {
+                setTeam1ImageIndex(team1ImageIndex + 1);
+              } else {
+                (document.querySelector(`img[alt="${match.team1}"]`) as HTMLImageElement).src = placeholderUrl;
+              }
+            }}
           />
           <span className="text-sm font-semibold text-gray-900">
             {match.team1}
@@ -259,10 +267,16 @@ export default function MatchCard({
 
         <div className="flex flex-col items-center">
           <img
-            src={team2ImageUrl}
+            src={team2ImageUrls[team2ImageIndex] || placeholderUrl}
             alt={match.team2}
             className="w-12 h-12 object-contain mb-1"
-            onError={(e) => { e.currentTarget.src = placeholderUrl; }}
+            onError={() => {
+              if (team2ImageIndex < team2ImageUrls.length - 1) {
+                setTeam2ImageIndex(team2ImageIndex + 1);
+              } else {
+                (document.querySelector(`img[alt="${match.team2}"]`) as HTMLImageElement).src = placeholderUrl;
+              }
+            }}
           />
           <span className="text-sm font-semibold text-gray-900">
             {match.team2}
