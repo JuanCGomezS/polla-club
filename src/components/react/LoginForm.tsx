@@ -26,10 +26,20 @@ export default function LoginForm() {
           setLoading(false);
           return;
         }
-        await registerUser(email, password, displayName);
-        window.location.href = getRoute('/groups');
+        try {
+          localStorage.setItem('pollaRegistering', '1');
+          const user = await registerUser(email, password, displayName);
+          //await new Promise(resolve => setTimeout(resolve, 1000));
+          localStorage.removeItem('pollaRegistering');
+          window.location.href = getRoute('/groups');
+        } catch (registerError: any) {
+          localStorage.removeItem('pollaRegistering');
+          console.error('❌ Error en registerUser:', registerError);
+          throw registerError;
+        }
       }
     } catch (err: any) {
+      console.error('❌ Error en handleSubmit:', err);
       setError(err.message || 'Error al procesar la solicitud');
     } finally {
       setLoading(false);

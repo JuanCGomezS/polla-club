@@ -12,9 +12,18 @@ export default function LoginRedirect() {
 
   useEffect(() => {
     setMounted(true);
+    const isRegistering = () => localStorage.getItem('pollaRegistering') === '1';
+    if (isRegistering()) {
+      setChecking(false);
+      return;
+    }
     
     // Verificar si ya hay un usuario autenticado
     const unsubscribe = onAuthStateChange((user) => {
+      if (isRegistering()) {
+        setChecking(false);
+        return;
+      }
       if (user) {
         // Si hay usuario, redirigir a grupos
         window.location.href = getRoute('/groups');
@@ -24,7 +33,7 @@ export default function LoginRedirect() {
     });
 
     const currentUser = getCurrentUser();
-    if (currentUser) {
+    if (!isRegistering() && currentUser) {
       window.location.href = getRoute('/groups');
     } else {
       setChecking(false);
