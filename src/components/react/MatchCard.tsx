@@ -2,8 +2,9 @@ import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { calculateMatchMinute, formatMatchMinute } from '../../lib/match-time';
 import { getBasePath, getTeamImageUrls } from '../../lib/utils';
+import { getTeamById } from '../../lib/competition-data';
 import MatchLeaderboardModal from './MatchLeaderboardModal';
-import type { Match, Prediction, Group } from '../../lib/types';
+import type { Match, Prediction, Group, Team } from '../../lib/types';
 
 interface MatchCardProps {
   match: Match;
@@ -32,9 +33,47 @@ export default function MatchCard({
   );
   const [team1ImageIndex, setTeam1ImageIndex] = useState(0);
   const [team2ImageIndex, setTeam2ImageIndex] = useState(0);
+  
+  // Estado para equipos resueltos desde Firestore/cache
+  const [team1Data, setTeam1Data] = useState<Team | null>(null);
+  const [team2Data, setTeam2Data] = useState<Team | null>(null);
+  const [teamsLoading, setTeamsLoading] = useState(true);
 
   const [isEditing, setIsEditing] = useState(!userPrediction && canEdit);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+
+  // Cargar datos de equipos desde Firestore/cache
+  useEffect(() => {
+    let cancelled = false;
+    
+    async function loadTeams() {
+      if (!match.team1Id || !match.team2Id) {
+        setTeamsLoading(false);
+        return;
+      }
+      
+      try {
+        const [t1, t2] = await Promise.all([
+          getTeamById(group.competitionId, match.team1Id),
+          getTeamById(group.competitionId, match.team2Id)
+        ]);
+        
+        if (!cancelled) {
+          setTeam1Data(t1);
+          setTeam2Data(t2);
+          setTeamsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error loading teams:', error);
+        if (!cancelled) {
+          setTeamsLoading(false);
+        }
+      }
+    }
+    
+    loadTeams();
+    return () => { cancelled = true; };
+  }, [match.team1Id, match.team2Id, group.competitionId]);
 
   useEffect(() => {
     if (userPrediction) {
@@ -52,17 +91,16 @@ export default function MatchCard({
     }
   }, [userPrediction, canEdit]);
 
-  const getTeamShort = (teamName: string, shortName?: string): string => {
-    return shortName || teamName.substring(0, 3).toUpperCase();
-  };
-
-  const team1Short = getTeamShort(match.team1, match.team1Short);
-  const team2Short = getTeamShort(match.team2, match.team2Short);
+  // Nombres y códigos desde teams (team1Id/team2Id)
+  const team1Name = team1Data?.name ?? '';
+  const team2Name = team2Data?.name ?? '';
+  const team1Code = team1Data?.code ?? '';
+  const team2Code = team2Data?.code ?? '';
 
   const baseUrl = getBasePath() || '/';
   const placeholderUrl = `${baseUrl}team-font.jpg`.replace(/\/+/g, '/');
-  const team1ImageUrls = getTeamImageUrls(match.team1Short);
-  const team2ImageUrls = getTeamImageUrls(match.team2Short);
+  const team1ImageUrls = getTeamImageUrls(team1Code);
+  const team2ImageUrls = getTeamImageUrls(team2Code);
 
   const formatDate = (timestamp: Timestamp | undefined): string => {
     if (!timestamp?.toDate) return '';
@@ -71,8 +109,9 @@ export default function MatchCard({
       weekday: 'short',
       day: 'numeric',
       month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -145,9 +184,6 @@ export default function MatchCard({
   const displayExtraTimeTotal = match.status === 'live'
     ? calculatedMinute?.extraTimeTotal ?? null
     : null;
-  const displaySeconds = match.status === 'live'
-    ? calculatedMinute?.seconds ?? null
-    : null;
   const minuteStatus = calculatedMinute?.status;
 
   return (
@@ -161,7 +197,7 @@ export default function MatchCard({
       {match.status === 'live' && displayMinute != null && (
         <div className="text-center mb-3">
           <span className="text-sm font-semibold text-green-700">
-            {formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, displaySeconds, minuteStatus) || displayMinute}
+            {formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, minuteStatus) || `${displayMinute}'`}
           </span>
         </div>
       )}
@@ -170,18 +206,18 @@ export default function MatchCard({
         <div className="flex flex-col items-center">
           <img
             src={team1ImageUrls[team1ImageIndex] || placeholderUrl}
-            alt={match.team1}
+            alt={team1Name}
             className="w-12 h-12 object-contain mb-1"
             onError={() => {
               if (team1ImageIndex < team1ImageUrls.length - 1) {
                 setTeam1ImageIndex(team1ImageIndex + 1);
               } else {
-                (document.querySelector(`img[alt="${match.team1}"]`) as HTMLImageElement).src = placeholderUrl;
+                (document.querySelector(`img[alt="${team1Name}"]`) as HTMLImageElement).src = placeholderUrl;
               }
             }}
           />
           <span className="text-sm font-semibold text-gray-900">
-            {match.team1}
+            {team1Name}
           </span>
         </div>
 
@@ -268,18 +304,18 @@ export default function MatchCard({
         <div className="flex flex-col items-center">
           <img
             src={team2ImageUrls[team2ImageIndex] || placeholderUrl}
-            alt={match.team2}
+            alt={team2Name}
             className="w-12 h-12 object-contain mb-1"
             onError={() => {
               if (team2ImageIndex < team2ImageUrls.length - 1) {
                 setTeam2ImageIndex(team2ImageIndex + 1);
               } else {
-                (document.querySelector(`img[alt="${match.team2}"]`) as HTMLImageElement).src = placeholderUrl;
+                (document.querySelector(`img[alt="${team2Name}"]`) as HTMLImageElement).src = placeholderUrl;
               }
             }}
           />
           <span className="text-sm font-semibold text-gray-900">
-            {match.team2}
+            {team2Name}
           </span>
         </div>
       </div>

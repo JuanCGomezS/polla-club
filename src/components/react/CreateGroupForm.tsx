@@ -16,14 +16,14 @@ export default function CreateGroupForm() {
   const [formData, setFormData] = useState({
     competitionId: '',
     name: '',
-    pointsExactScore: 3,
-    pointsWinner: 1,
-    pointsGoalDifference: 1,
-    pointsWinnerBonus: 0,
-    pointsRunnerUp: 0,
-    pointsThirdPlace: 0,
-    pointsTopScorer: 0,
-    pointsTopAssister: 0
+    pointsExactScore: '2',
+    pointsWinner: '1',
+    pointsGoalDifference: '1',
+    pointsWinnerBonus: '0',
+    pointsRunnerUp: '0',
+    pointsThirdPlace: '0',
+    pointsTopScorer: '0',
+    pointsTopAssister: '0'
   });
 
   useEffect(() => {
@@ -81,15 +81,27 @@ export default function CreateGroupForm() {
         throw new Error('No tienes permiso para crear grupos');
       }
 
+      const pointsExactScore = parseInt(formData.pointsExactScore, 10) || 0;
+      const pointsWinner = parseInt(formData.pointsWinner, 10) || 0;
+      const pointsGoalDifference = parseInt(formData.pointsGoalDifference, 10) || 0;
+      const pointsWinnerBonus = parseInt(formData.pointsWinnerBonus, 10) || 0;
+      const pointsRunnerUp = parseInt(formData.pointsRunnerUp, 10) || 0;
+      const pointsThirdPlace = parseInt(formData.pointsThirdPlace, 10) || 0;
+      const pointsTopScorer = parseInt(formData.pointsTopScorer, 10) || 0;
+      const pointsTopAssister = parseInt(formData.pointsTopAssister, 10) || 0;
+
+      if (pointsExactScore < 1) throw new Error('Los puntos por marcador exacto deben ser al menos 1');
+      if (pointsWinner < 1) throw new Error('Los puntos por acertar ganador deben ser al menos 1');
+
       const settings: Group['settings'] = {
-        pointsExactScore: formData.pointsExactScore,
-        pointsWinner: formData.pointsWinner,
-        ...(formData.pointsGoalDifference > 0 && { pointsGoalDifference: formData.pointsGoalDifference }),
-        ...(formData.pointsWinnerBonus > 0 && { pointsWinnerBonus: formData.pointsWinnerBonus }),
-        ...(formData.pointsRunnerUp > 0 && { pointsRunnerUp: formData.pointsRunnerUp }),
-        ...(formData.pointsThirdPlace > 0 && { pointsThirdPlace: formData.pointsThirdPlace }),
-        ...(formData.pointsTopScorer > 0 && { pointsTopScorer: formData.pointsTopScorer }),
-        ...(formData.pointsTopAssister > 0 && { pointsTopAssister: formData.pointsTopAssister })
+        pointsExactScore,
+        pointsWinner,
+        ...(pointsGoalDifference > 0 && { pointsGoalDifference }),
+        ...(pointsWinnerBonus > 0 && { pointsWinnerBonus }),
+        ...(pointsRunnerUp > 0 && { pointsRunnerUp }),
+        ...(pointsThirdPlace > 0 && { pointsThirdPlace }),
+        ...(pointsTopScorer > 0 && { pointsTopScorer }),
+        ...(pointsTopAssister > 0 && { pointsTopAssister })
       };
 
       const { groupId } = await createGroup(
@@ -194,7 +206,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsExactScore"
                 value={formData.pointsExactScore}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsExactScore: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsExactScore: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="1"
                 max="20"
@@ -211,7 +223,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsWinner"
                 value={formData.pointsWinner}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsWinner: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsWinner: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="1"
                 max="10"
@@ -228,7 +240,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsGoalDifference"
                 value={formData.pointsGoalDifference}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsGoalDifference: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsGoalDifference: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="5"
@@ -253,7 +265,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsWinnerBonus"
                 value={formData.pointsWinnerBonus}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsWinnerBonus: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsWinnerBonus: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="50"
@@ -269,7 +281,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsRunnerUp"
                 value={formData.pointsRunnerUp}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsRunnerUp: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsRunnerUp: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="50"
@@ -285,7 +297,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsThirdPlace"
                 value={formData.pointsThirdPlace}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsThirdPlace: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsThirdPlace: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="50"
@@ -301,7 +313,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsTopScorer"
                 value={formData.pointsTopScorer}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopScorer: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopScorer: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="50"
@@ -317,7 +329,7 @@ export default function CreateGroupForm() {
                 type="number"
                 id="pointsTopAssister"
                 value={formData.pointsTopAssister}
-                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopAssister: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, pointsTopAssister: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="0"
                 max="50"

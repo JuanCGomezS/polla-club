@@ -26,6 +26,24 @@ export interface Competition {
 }
 
 // ============================================
+// TEAMS & PLAYERS
+// ============================================
+export interface Team {
+  id: string;
+  name: string;
+  shortName: string;
+  code: string;
+  shield?: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  teamId: string;
+  position?: string;
+}
+
+// ============================================
 // MATCHES
 // ============================================
 export type MatchRound = 'group' | 'round16' | 'round8' | 'quarter' | 'semifinal' | 'third' | 'final';
@@ -37,10 +55,8 @@ export interface Match {
   competitionId: string;
   matchNumber: number;
   round: MatchRound;
-  team1: string;
-  team2: string;
-  team1Short?: string;
-  team2Short?: string;
+  team1Id: string;
+  team2Id: string;
   scheduledTime: Timestamp;
   startTime?: Timestamp;
   status: MatchStatus;
