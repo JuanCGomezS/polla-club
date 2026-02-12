@@ -74,7 +74,6 @@ export function formatMatchMinute(
   minute: number | null | undefined,
   extraTime: number | null | undefined = null,
   extraTimeTotal: number | null | undefined = null,
-  seconds: number | null | undefined = null,
   status?: 'not_started' | 'first_half' | 'first_half_extra' | 'halftime' | 'second_half' | 'second_half_extra' | 'finished'
 ): string {
   if (minute === null || minute === undefined) {
@@ -83,53 +82,33 @@ export function formatMatchMinute(
 
   if (status === 'halftime') {
     if (extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
-      return `Entretiempo (45+${extraTimeTotal})`;
+      return `Entretiempo (45+${extraTimeTotal}')`;
     }
     return 'Entretiempo';
   }
 
-  if (status === 'first_half_extra' && extraTime !== null && extraTime !== undefined && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
-    if (seconds !== null && seconds !== undefined) {
-      const minutesInExtraTime = Math.floor(extraTime);
-      const secondsInExtraTime = seconds;
-      return `Minuto 45+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
-    }
-    return `Minuto 45+${extraTimeTotal}`;
+  if (status === 'first_half_extra' && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
+    return `45+${extraTimeTotal}'`;
   }
 
-  if (status === 'second_half_extra' && extraTime !== null && extraTime !== undefined && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
-    if (seconds !== null && seconds !== undefined) {
-      const minutesInExtraTime = Math.floor(extraTime);
-      const secondsInExtraTime = seconds;
-      return `Minuto 90+${extraTimeTotal} (${minutesInExtraTime}:${secondsInExtraTime.toString().padStart(2, '0')})`;
-    }
-    return `Minuto 90+${extraTimeTotal}`;
+  if (status === 'second_half_extra' && extraTimeTotal !== null && extraTimeTotal !== undefined && extraTimeTotal > 0) {
+    return `90+${extraTimeTotal}'`;
   }
 
   if (status === 'first_half' && minute === 45) {
-    if (seconds !== null && seconds !== undefined) {
-      return `Minuto 45:${seconds.toString().padStart(2, '0')}`;
-    }
-    return 'Minuto 45';
+    return "45'";
   }
 
   if (status === 'second_half' && minute === 90) {
-    if (seconds !== null && seconds !== undefined) {
-      return `Minuto 90:${seconds.toString().padStart(2, '0')}`;
-    }
-    return 'Minuto 90';
+    return "90'";
   }
 
   if (status === 'finished') {
     if (extraTime !== null && extraTime !== undefined && extraTime > 0) {
-      return `Minuto 90+${extraTime}`;
+      return `90+${extraTime}'`;
     }
-    return 'Minuto 90+';
+    return "90+'";
   }
 
-  if (seconds !== null && seconds !== undefined) {
-    return `${minute}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  return minute.toString();
+  return `${minute}'`;
 }

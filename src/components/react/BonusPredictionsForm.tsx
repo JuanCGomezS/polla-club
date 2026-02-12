@@ -8,7 +8,7 @@ import {
   type BonusPredictionInput
 } from '../../lib/bonus-predictions';
 import { getCompetition } from '../../lib/competitions';
-import { PARTICIPATING_TEAMS, BONUS_PLAYERS_PLACEHOLDER } from '../../lib/constants/teams-and-players';
+import { getTeamNames, getPlayerNames } from '../../lib/competition-data';
 import type { Group, Competition } from '../../lib/types';
 
 interface BonusPredictionsFormProps {
@@ -114,24 +114,36 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
   const user = getCurrentUser();
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [locked, setLocked] = useState<boolean | null>(null);
+  const [lockedAt, setLockedAt] = useState<Date | null>(null);
   const [existing, setExisting] = useState<BonusPredictionInput | null>(null);
   const [form, setForm] = useState<BonusPredictionInput>({});
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState('');
+  
+  // Listas dinámicas de equipos y jugadores desde Firestore/cache
+  const [teamOptions, setTeamOptions] = useState<string[]>([]);
+  const [playerOptions, setPlayerOptions] = useState<string[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       if (!user || !group) return;
       try {
-        const [comp, isLocked, pred] = await Promise.all([
+        const [comp, {isLocked, lockedAt}, pred, teams, players] = await Promise.all([
           getCompetition(group.competitionId),
           isBonusLocked(group.competitionId),
-          getBonusPrediction(groupId, user.uid)
+          getBonusPrediction(groupId, user.uid),
+          getTeamNames(group.competitionId),
+          getPlayerNames(group.competitionId)
         ]);
         if (cancelled) return;
         setCompetition(comp ?? null);
         setLocked(isLocked);
+        setLockedAt(lockedAt ?? null);
+        setTeamOptions(teams);
+        setPlayerOptions(players);
+        setOptionsLoading(false);
         if (pred) {
           const data: BonusPredictionInput = {
             winner: pred.winner ?? '',
@@ -175,7 +187,7 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
       </div>
     );
   }
-  if (competition === null || locked === null) {
+  if (competition === null || locked === null || optionsLoading) {
     return (
       <div className="p-4 bg-gray-50 rounded-lg flex items-center gap-2">
         <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
@@ -184,6 +196,9 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
     );
   }
   if (!hasAnyBonus(competition)) return null;
+
+  const b = competition.bonusSettings;
+
   if (locked) {
     return (
       <section className="bg-white p-5 rounded-lg shadow border border-gray-200">
@@ -204,20 +219,23 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
     );
   }
 
-  const b = competition.bonusSettings;
-
   return (
     <section className="bg-white p-5 rounded-lg shadow border border-gray-200">
       <h2 className="text-lg font-bold text-gray-900 mb-1">Pronósticos bonus</h2>
       <p className="text-gray-600 text-sm mb-4">
         Pronósticos globales de la competición. Puedes filtrar cada lista escribiendo en el cuadro.
       </p>
+      {lockedAt && (
+        <p className="text-gray-600 text-sm mb-4">
+          Los pronósticos se cerrarán el {lockedAt.toLocaleDateString()} a las {lockedAt.toLocaleTimeString()}.
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {b.hasWinner && (
             <FilterableSelect
               label="Ganador de la competición"
-              options={PARTICIPATING_TEAMS}
+              options={teamOptions}
               value={form.winner ?? ''}
               onChange={(v) => setForm((f) => ({ ...f, winner: v }))}
               placeholder="Seleccionar equipo"
@@ -226,7 +244,7 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
           {b.hasRunnerUp && (
             <FilterableSelect
               label="Subcampeón"
-              options={PARTICIPATING_TEAMS}
+              options={teamOptions}
               value={form.runnerUp ?? ''}
               onChange={(v) => setForm((f) => ({ ...f, runnerUp: v }))}
               placeholder="Seleccionar equipo"
@@ -235,7 +253,7 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
           {b.hasThirdPlace && (
             <FilterableSelect
               label="Tercer lugar"
-              options={PARTICIPATING_TEAMS}
+              options={teamOptions}
               value={form.thirdPlace ?? ''}
               onChange={(v) => setForm((f) => ({ ...f, thirdPlace: v }))}
               placeholder="Seleccionar equipo"
@@ -244,7 +262,7 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
           {b.hasTopScorer && (
             <FilterableSelect
               label="Goleador"
-              options={BONUS_PLAYERS_PLACEHOLDER}
+              options={playerOptions}
               value={form.topScorer ?? ''}
               onChange={(v) => setForm((f) => ({ ...f, topScorer: v }))}
               placeholder="Seleccionar jugador"
@@ -253,7 +271,7 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
           {(b.hasTopAssister || b.hasTopScorer) && (
             <FilterableSelect
               label="Máximo asistidor"
-              options={BONUS_PLAYERS_PLACEHOLDER}
+              options={playerOptions}
               value={form.topAssister ?? ''}
               onChange={(v) => setForm((f) => ({ ...f, topAssister: v }))}
               placeholder="Seleccionar jugador"

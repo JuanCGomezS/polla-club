@@ -33,8 +33,8 @@ export function calculatePredictionPoints(
       breakdown.winner = groupSettings.pointsWinner;
     }
     
-    // Si hay puntos por diferencia, también se suman
-    if (groupSettings.pointsGoalDifference && Math.abs(resultDiff) > 0) {
+    // Si hay puntos por diferencia, también se suman (incluye empate: diferencia 0)
+    if (groupSettings.pointsGoalDifference) {
       points += groupSettings.pointsGoalDifference;
       breakdown.goalDifference = groupSettings.pointsGoalDifference;
     }
@@ -45,9 +45,8 @@ export function calculatePredictionPoints(
       breakdown.winner = groupSettings.pointsWinner;
     }
     
-    // Solo diferencia de goles (si aplica y no es empate)
-    if (groupSettings.pointsGoalDifference && 
-        predDiff === resultDiff && resultDiff !== 0) {
+    // Solo diferencia de goles: acertar la misma diferencia (incluye empate 0-0)
+    if (groupSettings.pointsGoalDifference && predDiff === resultDiff) {
       points += groupSettings.pointsGoalDifference;
       breakdown.goalDifference = groupSettings.pointsGoalDifference;
     }

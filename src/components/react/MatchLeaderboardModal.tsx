@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import MatchLeaderboard from './MatchLeaderboard';
 import { calculateMatchMinute, formatMatchMinute } from '../../lib/match-time';
+import { getTeamById } from '../../lib/competition-data';
 import type { Match, Group } from '../../lib/types';
 
 interface MatchLeaderboardModalProps {
@@ -19,12 +20,18 @@ export default function MatchLeaderboardModal({
   isOpen,
   onClose
 }: MatchLeaderboardModalProps) {
-  const getTeamShort = (teamName: string, shortName?: string): string => {
-    return shortName || teamName.substring(0, 3).toUpperCase();
-  };
+  const [team1Short, setTeam1Short] = useState('');
+  const [team2Short, setTeam2Short] = useState('');
 
-  const team1Short = getTeamShort(match.team1, match.team1Short);
-  const team2Short = getTeamShort(match.team2, match.team2Short);
+  useEffect(() => {
+    Promise.all([
+      getTeamById(group.competitionId, match.team1Id),
+      getTeamById(group.competitionId, match.team2Id)
+    ]).then(([t1, t2]) => {
+      setTeam1Short(t1?.shortName ?? '');
+      setTeam2Short(t2?.shortName ?? '');
+    });
+  }, [group.competitionId, match.team1Id, match.team2Id]);
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const extraTime1 = match.extraTime1 ?? 0;
@@ -50,14 +57,13 @@ export default function MatchLeaderboardModal({
   const displayMinute = calculatedMinute?.minute ?? null;
   const displayExtraTime = calculatedMinute?.extraTime ?? null;
   const displayExtraTimeTotal = calculatedMinute?.extraTimeTotal ?? null;
-  const displaySeconds = calculatedMinute?.seconds ?? null;
   const minuteStatus = calculatedMinute?.status;
 
   let title = '';
   if (match.result) {
     title = `${team1Short} ${match.result.team1Score} - ${match.result.team2Score} ${team2Short}`;
     if (match.status === 'live' && displayMinute != null) {
-      const timeStr = formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, displaySeconds, minuteStatus);
+      const timeStr = formatMatchMinute(displayMinute, displayExtraTime, displayExtraTimeTotal, minuteStatus);
       title += ` - ${timeStr}`;
     }
   } else {

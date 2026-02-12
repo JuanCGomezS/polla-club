@@ -1,0 +1,1880 @@
+{
+  "competitionId": "mundial-2026",
+  "exportedAt": "2026-02-12T14:42:44.124Z",
+  "competition": {
+    "id": "mundial-2026",
+    "name": "Mundial 2026",
+    "type": "world_cup",
+    "startDate": "2026-06-11T00:00:00.000Z",
+    "endDate": "2026-07-19T23:59:59.000Z",
+    "status": "upcoming",
+    "createdAt": "2026-01-20T16:05:36.881Z",
+    "updatedAt": "2026-01-20T16:05:36.881Z",
+    "bonusSettings": {
+      "hasWinner": true,
+      "hasRunnerUp": true,
+      "hasThirdPlace": true,
+      "hasTopScorer": true,
+      "hasTopAssister": false,
+      "bonusLockDate": "2026-03-01T00:00:00.293Z"
+    }
+  },
+  "teams": [
+    {
+      "id": "Alemania",
+      "name": "Alemania",
+      "shortName": "ALE",
+      "code": "GER",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Arabia Saudita",
+      "name": "Arabia Saudita",
+      "shortName": "KSA",
+      "code": "KSA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Argelia",
+      "name": "Argelia",
+      "shortName": "ARG",
+      "code": "ALG",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Argentina",
+      "name": "Argentina",
+      "shortName": "ARG",
+      "code": "ARG",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Australia",
+      "name": "Australia",
+      "shortName": "AUS",
+      "code": "AUS",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Austria",
+      "name": "Austria",
+      "shortName": "AUT",
+      "code": "AUT",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Brasil",
+      "name": "Brasil",
+      "shortName": "BRA",
+      "code": "BRA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Bélgica",
+      "name": "Bélgica",
+      "shortName": "BEL",
+      "code": "BEL",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Cabo Verde",
+      "name": "Cabo Verde",
+      "shortName": "CPV",
+      "code": "CPV",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Canadá",
+      "name": "Canadá",
+      "shortName": "CAN",
+      "code": "CAN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Catar",
+      "name": "Catar",
+      "shortName": "QAT",
+      "code": "QAT",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Colombia",
+      "name": "Colombia",
+      "shortName": "COL",
+      "code": "COL",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Corea del Sur",
+      "name": "Corea del Sur",
+      "shortName": "KOR",
+      "code": "KOR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Costa de Marfil",
+      "name": "Costa de Marfil",
+      "shortName": "CIV",
+      "code": "CIV",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Croacia",
+      "name": "Croacia",
+      "shortName": "CRO",
+      "code": "CRO",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Curazao",
+      "name": "Curazao",
+      "shortName": "CUW",
+      "code": "CUW",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ecuador",
+      "name": "Ecuador",
+      "shortName": "ECU",
+      "code": "ECU",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Egipto",
+      "name": "Egipto",
+      "shortName": "EGY",
+      "code": "EGY",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Escocia",
+      "name": "Escocia",
+      "shortName": "SCO",
+      "code": "SCO",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "España",
+      "name": "España",
+      "shortName": "ESP",
+      "code": "ESP",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Estados Unidos",
+      "name": "Estados Unidos",
+      "shortName": "USA",
+      "code": "USA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Francia",
+      "name": "Francia",
+      "shortName": "FRA",
+      "code": "FRA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador FIFA 1",
+      "name": "Ganador FIFA 1",
+      "shortName": "GFI1",
+      "code": "GFI1",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador FIFA 2",
+      "name": "Ganador FIFA 2",
+      "shortName": "GFI2",
+      "code": "GFI2",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador UEFA A",
+      "name": "Ganador UEFA A",
+      "shortName": "GUFA",
+      "code": "GUFA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador UEFA B",
+      "name": "Ganador UEFA B",
+      "shortName": "GUFB",
+      "code": "GUFB",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador UEFA C",
+      "name": "Ganador UEFA C",
+      "shortName": "GUFC",
+      "code": "GUFC",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ganador UEFA D",
+      "name": "Ganador UEFA D",
+      "shortName": "GUFD",
+      "code": "GUFD",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Ghana",
+      "name": "Ghana",
+      "shortName": "GHA",
+      "code": "GHA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Haití",
+      "name": "Haití",
+      "shortName": "HAI",
+      "code": "HAI",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Inglaterra",
+      "name": "Inglaterra",
+      "shortName": "ENG",
+      "code": "ENG",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Irán",
+      "name": "Irán",
+      "shortName": "IRN",
+      "code": "IRN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Japón",
+      "name": "Japón",
+      "shortName": "JPN",
+      "code": "JPN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Jordania",
+      "name": "Jordania",
+      "shortName": "JOR",
+      "code": "JOR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Marruecos",
+      "name": "Marruecos",
+      "shortName": "MAR",
+      "code": "MAR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "México",
+      "name": "México",
+      "shortName": "MEX",
+      "code": "MEX",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Noruega",
+      "name": "Noruega",
+      "shortName": "NOR",
+      "code": "NOR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Nueva Zelanda",
+      "name": "Nueva Zelanda",
+      "shortName": "NZL",
+      "code": "NZL",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Panamá",
+      "name": "Panamá",
+      "shortName": "PAN",
+      "code": "PAN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Paraguay",
+      "name": "Paraguay",
+      "shortName": "PAR",
+      "code": "PAR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Países Bajos",
+      "name": "Países Bajos",
+      "shortName": "NED",
+      "code": "NED",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Portugal",
+      "name": "Portugal",
+      "shortName": "POR",
+      "code": "POR",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Senegal",
+      "name": "Senegal",
+      "shortName": "SEN",
+      "code": "SEN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Sudáfrica",
+      "name": "Sudáfrica",
+      "shortName": "RSA",
+      "code": "RSA",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Suiza",
+      "name": "Suiza",
+      "shortName": "SUI",
+      "code": "SUI",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Túnez",
+      "name": "Túnez",
+      "shortName": "TUN",
+      "code": "TUN",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Uruguay",
+      "name": "Uruguay",
+      "shortName": "URU",
+      "code": "URU",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    },
+    {
+      "id": "Uzbekistán",
+      "name": "Uzbekistán",
+      "shortName": "UZB",
+      "code": "UZB",
+      "createdAt": "2026-02-12T14:33:44.130Z"
+    }
+  ],
+  "players": [
+    {
+      "id": "Antoine Griezmann",
+      "name": "Antoine Griezmann",
+      "teamId": "Francia",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Erling Haaland",
+      "name": "Erling Haaland",
+      "teamId": "Noruega",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Harry Kane",
+      "name": "Harry Kane",
+      "teamId": "Inglaterra",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Jude Bellingham",
+      "name": "Jude Bellingham",
+      "teamId": "Inglaterra",
+      "position": "Mediocampista",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Kevin De Bruyne",
+      "name": "Kevin De Bruyne",
+      "teamId": "Bélgica",
+      "position": "Mediocampista",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Kylian Mbappé",
+      "name": "Kylian Mbappé",
+      "teamId": "Francia",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Lionel Messi",
+      "name": "Lionel Messi",
+      "teamId": "Argentina",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Mohamed Salah",
+      "name": "Mohamed Salah",
+      "teamId": "Egipto",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Rodri",
+      "name": "Rodri",
+      "teamId": "España",
+      "position": "Mediocampista",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    },
+    {
+      "id": "Vinicius Jr",
+      "name": "Vinicius Jr",
+      "teamId": "Brasil",
+      "position": "Delantero",
+      "createdAt": "2026-02-12T14:33:44.512Z"
+    }
+  ],
+  "matches": [
+    {
+      "id": "match-001-MEXvsRSA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 1,
+      "round": "group",
+      "team1Id": "México",
+      "team2Id": "Sudáfrica",
+      "scheduledTime": "2026-06-11T19:00:00.000Z",
+      "startTime": "2026-06-11T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-002-KORvsGUFD",
+      "competitionId": "mundial-2026",
+      "matchNumber": 2,
+      "round": "group",
+      "team1Id": "Corea del Sur",
+      "team2Id": "Ganador UEFA D",
+      "scheduledTime": "2026-06-12T02:00:00.000Z",
+      "startTime": "2026-06-12T02:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-003-CANvsGUFA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 3,
+      "round": "group",
+      "team1Id": "Canadá",
+      "team2Id": "Ganador UEFA A",
+      "scheduledTime": "2026-06-12T19:00:00.000Z",
+      "startTime": "2026-06-12T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-004-USAvsPAR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 4,
+      "round": "group",
+      "team1Id": "Estados Unidos",
+      "team2Id": "Paraguay",
+      "scheduledTime": "2026-06-13T01:00:00.000Z",
+      "startTime": "2026-06-13T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-005-QATvsSUI",
+      "competitionId": "mundial-2026",
+      "matchNumber": 5,
+      "round": "group",
+      "team1Id": "Catar",
+      "team2Id": "Suiza",
+      "scheduledTime": "2026-06-13T19:00:00.000Z",
+      "startTime": "2026-06-13T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-006-BRAvsMAR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 6,
+      "round": "group",
+      "team1Id": "Brasil",
+      "team2Id": "Marruecos",
+      "scheduledTime": "2026-06-13T22:00:00.000Z",
+      "startTime": "2026-06-13T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-007-HAIvsSCO",
+      "competitionId": "mundial-2026",
+      "matchNumber": 7,
+      "round": "group",
+      "team1Id": "Haití",
+      "team2Id": "Escocia",
+      "scheduledTime": "2026-06-14T01:00:00.000Z",
+      "startTime": "2026-06-14T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-008-AUSvsGUFC",
+      "competitionId": "mundial-2026",
+      "matchNumber": 8,
+      "round": "group",
+      "team1Id": "Australia",
+      "team2Id": "Ganador UEFA C",
+      "scheduledTime": "2026-06-14T04:00:00.000Z",
+      "startTime": "2026-06-14T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-009-ALEvsCUW",
+      "competitionId": "mundial-2026",
+      "matchNumber": 9,
+      "round": "group",
+      "team1Id": "Alemania",
+      "team2Id": "Curazao",
+      "scheduledTime": "2026-06-14T17:00:00.000Z",
+      "startTime": "2026-06-14T17:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-010-NEDvsJPN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 10,
+      "round": "group",
+      "team1Id": "Países Bajos",
+      "team2Id": "Japón",
+      "scheduledTime": "2026-06-14T20:00:00.000Z",
+      "startTime": "2026-06-14T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-011-CIVvsECU",
+      "competitionId": "mundial-2026",
+      "matchNumber": 11,
+      "round": "group",
+      "team1Id": "Costa de Marfil",
+      "team2Id": "Ecuador",
+      "scheduledTime": "2026-06-14T23:00:00.000Z",
+      "startTime": "2026-06-14T23:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-012-GUFBvsTUN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 12,
+      "round": "group",
+      "team1Id": "Ganador UEFA B",
+      "team2Id": "Túnez",
+      "scheduledTime": "2026-06-15T02:00:00.000Z",
+      "startTime": "2026-06-15T02:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-013-ESPvsCPV",
+      "competitionId": "mundial-2026",
+      "matchNumber": 13,
+      "round": "group",
+      "team1Id": "España",
+      "team2Id": "Cabo Verde",
+      "scheduledTime": "2026-06-15T16:00:00.000Z",
+      "startTime": "2026-06-15T16:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-014-BELvsEGY",
+      "competitionId": "mundial-2026",
+      "matchNumber": 14,
+      "round": "group",
+      "team1Id": "Bélgica",
+      "team2Id": "Egipto",
+      "scheduledTime": "2026-06-15T19:00:00.000Z",
+      "startTime": "2026-06-15T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-015-KSAvsURU",
+      "competitionId": "mundial-2026",
+      "matchNumber": 15,
+      "round": "group",
+      "team1Id": "Arabia Saudita",
+      "team2Id": "Uruguay",
+      "scheduledTime": "2026-06-15T22:00:00.000Z",
+      "startTime": "2026-06-15T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-016-IRNvsNZL",
+      "competitionId": "mundial-2026",
+      "matchNumber": 16,
+      "round": "group",
+      "team1Id": "Irán",
+      "team2Id": "Nueva Zelanda",
+      "scheduledTime": "2026-06-16T01:00:00.000Z",
+      "startTime": "2026-06-16T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-017-FRAvsSEN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 17,
+      "round": "group",
+      "team1Id": "Francia",
+      "team2Id": "Senegal",
+      "scheduledTime": "2026-06-16T19:00:00.000Z",
+      "startTime": "2026-06-16T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-018-GFI2vsNOR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 18,
+      "round": "group",
+      "team1Id": "Ganador FIFA 2",
+      "team2Id": "Noruega",
+      "scheduledTime": "2026-06-16T22:00:00.000Z",
+      "startTime": "2026-06-16T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-019-ARGvsARG",
+      "competitionId": "mundial-2026",
+      "matchNumber": 19,
+      "round": "group",
+      "team1Id": "Argentina",
+      "team2Id": "Argelia",
+      "scheduledTime": "2026-06-17T01:00:00.000Z",
+      "startTime": "2026-06-17T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-020-AUTvsJOR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 20,
+      "round": "group",
+      "team1Id": "Austria",
+      "team2Id": "Jordania",
+      "scheduledTime": "2026-06-17T04:00:00.000Z",
+      "startTime": "2026-06-17T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-021-ENGvsCRO",
+      "competitionId": "mundial-2026",
+      "matchNumber": 21,
+      "round": "group",
+      "team1Id": "Inglaterra",
+      "team2Id": "Croacia",
+      "scheduledTime": "2026-06-17T20:00:00.000Z",
+      "startTime": "2026-06-17T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-022-GHAvsPAN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 22,
+      "round": "group",
+      "team1Id": "Ghana",
+      "team2Id": "Panamá",
+      "scheduledTime": "2026-06-17T23:00:00.000Z",
+      "startTime": "2026-06-17T23:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-023-UZBvsCOL",
+      "competitionId": "mundial-2026",
+      "matchNumber": 23,
+      "round": "group",
+      "team1Id": "Uzbekistán",
+      "team2Id": "Colombia",
+      "scheduledTime": "2026-06-18T02:00:00.000Z",
+      "startTime": "2026-06-18T02:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-024-PORvsGFI1",
+      "competitionId": "mundial-2026",
+      "matchNumber": 24,
+      "round": "group",
+      "team1Id": "Portugal",
+      "team2Id": "Ganador FIFA 1",
+      "scheduledTime": "2026-06-17T05:00:00.000Z",
+      "startTime": "2026-06-17T05:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-025-RSAvsGUFD",
+      "competitionId": "mundial-2026",
+      "matchNumber": 25,
+      "round": "group",
+      "team1Id": "Sudáfrica",
+      "team2Id": "Ganador UEFA D",
+      "scheduledTime": "2026-06-18T16:00:00.000Z",
+      "startTime": "2026-06-18T16:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-026-GUFAvsSUI",
+      "competitionId": "mundial-2026",
+      "matchNumber": 26,
+      "round": "group",
+      "team1Id": "Ganador UEFA A",
+      "team2Id": "Suiza",
+      "scheduledTime": "2026-06-18T19:00:00.000Z",
+      "startTime": "2026-06-18T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-027-CANvsQAT",
+      "competitionId": "mundial-2026",
+      "matchNumber": 27,
+      "round": "group",
+      "team1Id": "Canadá",
+      "team2Id": "Catar",
+      "scheduledTime": "2026-06-18T22:00:00.000Z",
+      "startTime": "2026-06-18T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-028-MEXvsKOR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 28,
+      "round": "group",
+      "team1Id": "México",
+      "team2Id": "Corea del Sur",
+      "scheduledTime": "2026-06-19T01:00:00.000Z",
+      "startTime": "2026-06-19T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-029-USAvsAUS",
+      "competitionId": "mundial-2026",
+      "matchNumber": 29,
+      "round": "group",
+      "team1Id": "Estados Unidos",
+      "team2Id": "Australia",
+      "scheduledTime": "2026-06-19T19:00:00.000Z",
+      "startTime": "2026-06-19T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-030-SCOvsMAR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 30,
+      "round": "group",
+      "team1Id": "Escocia",
+      "team2Id": "Marruecos",
+      "scheduledTime": "2026-06-19T22:00:00.000Z",
+      "startTime": "2026-06-19T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-031-BRAvsHAI",
+      "competitionId": "mundial-2026",
+      "matchNumber": 31,
+      "round": "group",
+      "team1Id": "Brasil",
+      "team2Id": "Haití",
+      "scheduledTime": "2026-06-20T01:00:00.000Z",
+      "startTime": "2026-06-20T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-032-GUFCvsPAR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 32,
+      "round": "group",
+      "team1Id": "Ganador UEFA C",
+      "team2Id": "Paraguay",
+      "scheduledTime": "2026-06-20T04:00:00.000Z",
+      "startTime": "2026-06-20T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-033-NEDvsGUFB",
+      "competitionId": "mundial-2026",
+      "matchNumber": 33,
+      "round": "group",
+      "team1Id": "Países Bajos",
+      "team2Id": "Ganador UEFA B",
+      "scheduledTime": "2026-06-20T17:00:00.000Z",
+      "startTime": "2026-06-20T17:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-034-ALEvsCIV",
+      "competitionId": "mundial-2026",
+      "matchNumber": 34,
+      "round": "group",
+      "team1Id": "Alemania",
+      "team2Id": "Costa de Marfil",
+      "scheduledTime": "2026-06-20T20:00:00.000Z",
+      "startTime": "2026-06-20T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-035-ECUvsCUW",
+      "competitionId": "mundial-2026",
+      "matchNumber": 35,
+      "round": "group",
+      "team1Id": "Ecuador",
+      "team2Id": "Curazao",
+      "scheduledTime": "2026-06-21T00:00:00.000Z",
+      "startTime": "2026-06-21T00:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-036-TUNvsJPN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 36,
+      "round": "group",
+      "team1Id": "Túnez",
+      "team2Id": "Japón",
+      "scheduledTime": "2026-06-21T04:00:00.000Z",
+      "startTime": "2026-06-21T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-037-ESPvsKSA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 37,
+      "round": "group",
+      "team1Id": "España",
+      "team2Id": "Arabia Saudita",
+      "scheduledTime": "2026-06-21T16:00:00.000Z",
+      "startTime": "2026-06-21T16:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-038-BELvsIRN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 38,
+      "round": "group",
+      "team1Id": "Bélgica",
+      "team2Id": "Irán",
+      "scheduledTime": "2026-06-21T19:00:00.000Z",
+      "startTime": "2026-06-21T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-039-URUvsCPV",
+      "competitionId": "mundial-2026",
+      "matchNumber": 39,
+      "round": "group",
+      "team1Id": "Uruguay",
+      "team2Id": "Cabo Verde",
+      "scheduledTime": "2026-06-21T22:00:00.000Z",
+      "startTime": "2026-06-21T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-040-NZLvsEGY",
+      "competitionId": "mundial-2026",
+      "matchNumber": 40,
+      "round": "group",
+      "team1Id": "Nueva Zelanda",
+      "team2Id": "Egipto",
+      "scheduledTime": "2026-06-22T01:00:00.000Z",
+      "startTime": "2026-06-22T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-041-ARGvsAUT",
+      "competitionId": "mundial-2026",
+      "matchNumber": 41,
+      "round": "group",
+      "team1Id": "Argentina",
+      "team2Id": "Austria",
+      "scheduledTime": "2026-06-22T17:00:00.000Z",
+      "startTime": "2026-06-22T17:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-042-FRAvsGFI2",
+      "competitionId": "mundial-2026",
+      "matchNumber": 42,
+      "round": "group",
+      "team1Id": "Francia",
+      "team2Id": "Ganador FIFA 2",
+      "scheduledTime": "2026-06-22T19:00:00.000Z",
+      "startTime": "2026-06-22T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-043-NORvsSEN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 43,
+      "round": "group",
+      "team1Id": "Noruega",
+      "team2Id": "Senegal",
+      "scheduledTime": "2026-06-23T00:00:00.000Z",
+      "startTime": "2026-06-23T00:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-044-JORvsARG",
+      "competitionId": "mundial-2026",
+      "matchNumber": 44,
+      "round": "group",
+      "team1Id": "Jordania",
+      "team2Id": "Argelia",
+      "scheduledTime": "2026-06-23T04:00:00.000Z",
+      "startTime": "2026-06-23T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-045-PORvsUZB",
+      "competitionId": "mundial-2026",
+      "matchNumber": 45,
+      "round": "group",
+      "team1Id": "Portugal",
+      "team2Id": "Uzbekistán",
+      "scheduledTime": "2026-06-23T17:00:00.000Z",
+      "startTime": "2026-06-23T17:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-046-ENGvsGHA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 46,
+      "round": "group",
+      "team1Id": "Inglaterra",
+      "team2Id": "Ghana",
+      "scheduledTime": "2026-06-23T20:00:00.000Z",
+      "startTime": "2026-06-23T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-047-PANvsCRO",
+      "competitionId": "mundial-2026",
+      "matchNumber": 47,
+      "round": "group",
+      "team1Id": "Panamá",
+      "team2Id": "Croacia",
+      "scheduledTime": "2026-06-23T23:00:00.000Z",
+      "startTime": "2026-06-23T23:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-048-COLvsGFI1",
+      "competitionId": "mundial-2026",
+      "matchNumber": 48,
+      "round": "group",
+      "team1Id": "Colombia",
+      "team2Id": "Ganador FIFA 1",
+      "scheduledTime": "2026-06-24T02:00:00.000Z",
+      "startTime": "2026-06-24T02:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-049-SUIvsCAN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 49,
+      "round": "group",
+      "team1Id": "Suiza",
+      "team2Id": "Canadá",
+      "scheduledTime": "2026-06-24T19:00:00.000Z",
+      "startTime": "2026-06-24T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-050-GUFAvsQAT",
+      "competitionId": "mundial-2026",
+      "matchNumber": 50,
+      "round": "group",
+      "team1Id": "Ganador UEFA A",
+      "team2Id": "Catar",
+      "scheduledTime": "2026-06-24T19:00:00.000Z",
+      "startTime": "2026-06-24T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-051-SCOvsBRA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 51,
+      "round": "group",
+      "team1Id": "Escocia",
+      "team2Id": "Brasil",
+      "scheduledTime": "2026-06-24T22:00:00.000Z",
+      "startTime": "2026-06-24T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-052-MARvsHAI",
+      "competitionId": "mundial-2026",
+      "matchNumber": 52,
+      "round": "group",
+      "team1Id": "Marruecos",
+      "team2Id": "Haití",
+      "scheduledTime": "2026-06-24T22:00:00.000Z",
+      "startTime": "2026-06-24T22:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-053-GUFDvsMEX",
+      "competitionId": "mundial-2026",
+      "matchNumber": 53,
+      "round": "group",
+      "team1Id": "Ganador UEFA D",
+      "team2Id": "México",
+      "scheduledTime": "2026-06-25T01:00:00.000Z",
+      "startTime": "2026-06-25T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-054-RSAvsKOR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 54,
+      "round": "group",
+      "team1Id": "Sudáfrica",
+      "team2Id": "Corea del Sur",
+      "scheduledTime": "2026-06-25T01:00:00.000Z",
+      "startTime": "2026-06-25T01:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-055-ECUvsALE",
+      "competitionId": "mundial-2026",
+      "matchNumber": 55,
+      "round": "group",
+      "team1Id": "Ecuador",
+      "team2Id": "Alemania",
+      "scheduledTime": "2026-06-25T20:00:00.000Z",
+      "startTime": "2026-06-25T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-056-CUWvsCIV",
+      "competitionId": "mundial-2026",
+      "matchNumber": 56,
+      "round": "group",
+      "team1Id": "Curazao",
+      "team2Id": "Costa de Marfil",
+      "scheduledTime": "2026-06-25T20:00:00.000Z",
+      "startTime": "2026-06-25T20:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-057-TUNvsNED",
+      "competitionId": "mundial-2026",
+      "matchNumber": 57,
+      "round": "group",
+      "team1Id": "Túnez",
+      "team2Id": "Países Bajos",
+      "scheduledTime": "2026-06-25T23:00:00.000Z",
+      "startTime": "2026-06-25T23:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-058-JPNvsGUFB",
+      "competitionId": "mundial-2026",
+      "matchNumber": 58,
+      "round": "group",
+      "team1Id": "Japón",
+      "team2Id": "Ganador UEFA B",
+      "scheduledTime": "2026-06-25T23:00:00.000Z",
+      "startTime": "2026-06-25T23:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-059-GUFCvsUSA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 59,
+      "round": "group",
+      "team1Id": "Ganador UEFA C",
+      "team2Id": "Estados Unidos",
+      "scheduledTime": "2026-06-26T04:00:00.000Z",
+      "startTime": "2026-06-26T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-060-PARvsAUS",
+      "competitionId": "mundial-2026",
+      "matchNumber": 60,
+      "round": "group",
+      "team1Id": "Paraguay",
+      "team2Id": "Australia",
+      "scheduledTime": "2026-06-26T04:00:00.000Z",
+      "startTime": "2026-06-26T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-061-NORvsFRA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 61,
+      "round": "group",
+      "team1Id": "Noruega",
+      "team2Id": "Francia",
+      "scheduledTime": "2026-06-26T19:00:00.000Z",
+      "startTime": "2026-06-26T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-062-SENvsGFI2",
+      "competitionId": "mundial-2026",
+      "matchNumber": 62,
+      "round": "group",
+      "team1Id": "Senegal",
+      "team2Id": "Ganador FIFA 2",
+      "scheduledTime": "2026-06-26T19:00:00.000Z",
+      "startTime": "2026-06-26T19:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-063-URUvsESP",
+      "competitionId": "mundial-2026",
+      "matchNumber": 63,
+      "round": "group",
+      "team1Id": "Uruguay",
+      "team2Id": "España",
+      "scheduledTime": "2026-06-27T00:00:00.000Z",
+      "startTime": "2026-06-27T00:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-064-CPVvsKSA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 64,
+      "round": "group",
+      "team1Id": "Cabo Verde",
+      "team2Id": "Arabia Saudita",
+      "scheduledTime": "2026-06-27T00:00:00.000Z",
+      "startTime": "2026-06-27T00:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-065-NZLvsBEL",
+      "competitionId": "mundial-2026",
+      "matchNumber": 65,
+      "round": "group",
+      "team1Id": "Nueva Zelanda",
+      "team2Id": "Bélgica",
+      "scheduledTime": "2026-06-27T03:00:00.000Z",
+      "startTime": "2026-06-27T03:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-066-EGYvsIRN",
+      "competitionId": "mundial-2026",
+      "matchNumber": 66,
+      "round": "group",
+      "team1Id": "Egipto",
+      "team2Id": "Irán",
+      "scheduledTime": "2026-06-27T03:00:00.000Z",
+      "startTime": "2026-06-27T03:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-067-PANvsENG",
+      "competitionId": "mundial-2026",
+      "matchNumber": 67,
+      "round": "group",
+      "team1Id": "Panamá",
+      "team2Id": "Inglaterra",
+      "scheduledTime": "2026-06-27T21:00:00.000Z",
+      "startTime": "2026-06-27T21:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-068-CROvsGHA",
+      "competitionId": "mundial-2026",
+      "matchNumber": 68,
+      "round": "group",
+      "team1Id": "Croacia",
+      "team2Id": "Ghana",
+      "scheduledTime": "2026-06-27T21:00:00.000Z",
+      "startTime": "2026-06-27T21:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-069-COLvsPOR",
+      "competitionId": "mundial-2026",
+      "matchNumber": 69,
+      "round": "group",
+      "team1Id": "Colombia",
+      "team2Id": "Portugal",
+      "scheduledTime": "2026-06-27T23:30:00.000Z",
+      "startTime": "2026-06-27T23:30:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-070-GFI1vsUZB",
+      "competitionId": "mundial-2026",
+      "matchNumber": 70,
+      "round": "group",
+      "team1Id": "Ganador FIFA 1",
+      "team2Id": "Uzbekistán",
+      "scheduledTime": "2026-06-27T23:30:00.000Z",
+      "startTime": "2026-06-27T23:30:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-071-JORvsARG",
+      "competitionId": "mundial-2026",
+      "matchNumber": 71,
+      "round": "group",
+      "team1Id": "Jordania",
+      "team2Id": "Argentina",
+      "scheduledTime": "2026-06-28T04:00:00.000Z",
+      "startTime": "2026-06-28T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    },
+    {
+      "id": "match-072-ARGvsAUS",
+      "competitionId": "mundial-2026",
+      "matchNumber": 72,
+      "round": "group",
+      "team1Id": "Argelia",
+      "team2Id": "Australia",
+      "scheduledTime": "2026-06-28T04:00:00.000Z",
+      "startTime": "2026-06-28T04:00:00.000Z",
+      "status": "scheduled",
+      "result": {
+        "team1Score": 0,
+        "team2Score": 0
+      },
+      "extraTime1": 0,
+      "extraTime2": 0,
+      "halftimeDuration": 15,
+      "createdAt": "2026-02-12T14:41:29.969Z",
+      "updatedAt": "2026-02-12T14:41:29.969Z"
+    }
+  ],
+  "results": {
+    "id": "main",
+    "competitionId": "mundial-2026",
+    "isLocked": false,
+    "updatedAt": "2026-01-20T16:05:36.881Z"
+  }
+}

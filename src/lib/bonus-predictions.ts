@@ -17,17 +17,17 @@ import type { BonusPrediction, Competition } from './types';
 /**
  * Comprueba si los pronósticos bonus están bloqueados para esta competición.
  */
-export async function isBonusLocked(competitionId: string): Promise<boolean> {
+export async function isBonusLocked(competitionId: string): Promise<{ isLocked: boolean, lockedAt?: Date | null }> {
   const [competition, results] = await Promise.all([
     getCompetition(competitionId),
     getCompetitionResults(competitionId)
   ]);
-  if (results?.isLocked) return true;
+  if (results?.isLocked) return { isLocked: true, lockedAt: null };
   const lockDate = competition?.bonusSettings?.bonusLockDate;
   if (lockDate && lockDate.toMillis) {
-    if (lockDate.toMillis() < Date.now()) return true;
+    if (lockDate.toMillis() < Date.now()) return { isLocked: true, lockedAt: lockDate.toDate() };
   }
-  return false;
+  return { isLocked: false, lockedAt: lockDate?.toDate() ?? null };
 }
 
 /**
