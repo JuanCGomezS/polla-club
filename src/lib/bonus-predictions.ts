@@ -21,6 +21,29 @@ function matchBonusValue(pred?: string, result?: string): boolean {
   return normalize(pred) === normalize(result);
 }
 
+function toCandidates(result?: string | string[]): string[] {
+  if (!result) return [];
+  if (Array.isArray(result)) {
+    return result.map((value) => normalize(String(value))).filter(Boolean);
+  }
+  return String(result)
+    .split(',')
+    .map((value) => normalize(value))
+    .filter(Boolean);
+}
+
+function matchBonusCandidates(pred?: string, result?: string | string[]): boolean {
+  if (!pred) return false;
+  return toCandidates(result).includes(normalize(pred));
+}
+
+function hasOfficialResult(key: BonusKey, value: CompetitionResult[BonusKey]): boolean {
+  if (key === 'topScorer' || key === 'topAssister') {
+    return toCandidates(value as string | string[] | undefined).length > 0;
+  }
+  return Boolean(value);
+}
+
 type BonusKey = keyof NonNullable<BonusPrediction['pointsBreakdown']>;
 
 const BONUS_CONFIG: { key: BonusKey; pointsKey: keyof Group['settings'] }[] = [
@@ -45,7 +68,14 @@ export function calculateBonusPoints(
   for (const { key, pointsKey } of BONUS_CONFIG) {
     const result = results[key];
     const pts = settings[pointsKey] as number | undefined;
-    if (!result || !pts || !matchBonusValue(prediction[key], result)) continue;
+    if (!result || !pts) continue;
+
+    const matches =
+      key === 'topScorer' || key === 'topAssister'
+        ? matchBonusCandidates(prediction[key], result as string | string[])
+        : matchBonusValue(prediction[key], result as string);
+
+    if (!matches) continue;
     points += pts;
     breakdown[key] = pts;
   }
@@ -70,7 +100,7 @@ export async function applyBonusPointsForCompetition(competitionId: string): Pro
     throw new Error(`No hay documento de resultados para la competición ${competitionId}. Créalo antes con setCompetitionResults.`);
   }
 
-  const hasAnyResult = BONUS_CONFIG.some(({ key }) => results[key]);
+  const hasAnyResult = BONUS_CONFIG.some(({ key }) => hasOfficialResult(key, results[key]));
 
   if (!hasAnyResult) {
     throw new Error(`Los resultados de ${competitionId} están vacíos. Establece al menos ganador, subcampeón, etc. antes de aplicar bonus.`);

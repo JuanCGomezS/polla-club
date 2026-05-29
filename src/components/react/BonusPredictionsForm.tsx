@@ -4,13 +4,12 @@ import {
   getBonusPrediction,
   getBonusPredictionsForGroup,
   hasAnyBonus,
-  isBonusLocked,
   saveBonusPrediction,
   type BonusPredictionInput
 } from '../../lib/bonus-predictions';
 import { getPlayerOptionsWithTeam, getTeamNames } from '../../lib/competition-data';
-import { getCompetition } from '../../lib/competitions';
-import type { BonusPrediction, Competition, Group } from '../../lib/types';
+import { getCompetition, getCompetitionResults } from '../../lib/competitions';
+import type { BonusPrediction, Competition, CompetitionResult, Group } from '../../lib/types';
 import Modal from './Modal';
 
 interface BonusPredictionsFormProps {
@@ -120,6 +119,7 @@ function FilterableSelect({
 export default function BonusPredictionsForm({ groupId, group }: BonusPredictionsFormProps) {
   const user = getCurrentUser();
   const [competition, setCompetition] = useState<Competition | null>(null);
+  const [officialResults, setOfficialResults] = useState<CompetitionResult | null>(null);
   const [locked, setLocked] = useState<boolean | null>(null);
   const [lockedAt, setLockedAt] = useState<Date | null>(null);
   const [existing, setExisting] = useState<BonusPredictionInput | null>(null);
@@ -148,17 +148,24 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
     async function load() {
       if (!user || !group) return;
       try {
-        const [comp, {isLocked, lockedAt}, pred, teams, players] = await Promise.all([
+        const [comp, results, pred, teams, players] = await Promise.all([
           getCompetition(group.competitionId),
-          isBonusLocked(group.competitionId),
+          getCompetitionResults(group.competitionId),
           getBonusPrediction(groupId, user.uid),
           getTeamNames(group.competitionId),
           getPlayerOptionsWithTeam(group.competitionId)
         ]);
         if (cancelled) return;
+
+        const bonusLockDate = comp?.bonusSettings?.bonusLockDate;
+        const computedLocked =
+          Boolean(results?.isLocked) ||
+          Boolean(bonusLockDate?.toMillis && bonusLockDate.toMillis() < Date.now());
+
         setCompetition(comp ?? null);
-        setLocked(isLocked);
-        setLockedAt(lockedAt ?? null);
+        setOfficialResults(results ?? null);
+        setLocked(computedLocked);
+        setLockedAt(bonusLockDate?.toDate?.() ?? null);
         setTeamOptions(teams);
         setPlayerOptions(players);
         setOptionsLoading(false);
@@ -266,6 +273,46 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
   const b = competition.bonusSettings;
   const display = locked ? existing ?? {} : form;
 
+  function formatResultValue(value?: string | string[]): string | undefined {
+    if (value == null) return undefined;
+    if (Array.isArray(value)) {
+      const cleaned = value.map((v) => String(v).trim()).filter(Boolean);
+      return cleaned.length > 0 ? cleaned.join(' / ') : undefined;
+    }
+    const cleaned = String(value).trim();
+    return cleaned || undefined;
+  }
+
+  function resolvePlayerLabel(value?: string): string | undefined {
+    if (!value?.trim()) return undefined;
+    return playerOptions.find((o) => o.value === value)?.label ?? value;
+  }
+
+  function buildSecondaryPrediction(official?: string, prediction?: string): string | undefined {
+    if (!prediction?.trim()) return undefined;
+    if (!official?.trim()) return prediction;
+    if (official.trim().toLowerCase() === prediction.trim().toLowerCase()) return prediction;
+    return prediction;
+  }
+
+  const officialWinner = formatResultValue(officialResults?.winner);
+  const officialRunnerUp = formatResultValue(officialResults?.runnerUp);
+  const officialThirdPlace = formatResultValue(officialResults?.thirdPlace);
+  const officialTopScorer = formatResultValue(officialResults?.topScorer);
+  const officialTopAssister = formatResultValue(officialResults?.topAssister);
+
+  const winnerValue = officialWinner ?? display.winner;
+  const runnerUpValue = officialRunnerUp ?? display.runnerUp;
+  const thirdPlaceValue = officialThirdPlace ?? display.thirdPlace;
+  const topScorerValue = officialTopScorer ?? resolvePlayerLabel(display.topScorer);
+  const topAssisterValue = officialTopAssister ?? resolvePlayerLabel(display.topAssister);
+
+  const winnerPrediction = buildSecondaryPrediction(officialWinner, display.winner);
+  const runnerUpPrediction = buildSecondaryPrediction(officialRunnerUp, display.runnerUp);
+  const thirdPlacePrediction = buildSecondaryPrediction(officialThirdPlace, display.thirdPlace);
+  const topScorerPrediction = buildSecondaryPrediction(officialTopScorer, resolvePlayerLabel(display.topScorer));
+  const topAssisterPrediction = buildSecondaryPrediction(officialTopAssister, resolvePlayerLabel(display.topAssister));
+
   const modalTitle = (
     <div className="flex items-center justify-between gap-3">
       <span className="text-[color:var(--pc-text-on-dark)]">Pronósticos bonus del grupo</span>
@@ -294,7 +341,17 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
     );
   }
 
-  function PodiumCard({ rank, value }: { rank: 1 | 2 | 3; value?: string }) {
+  function PodiumCard({
+    rank,
+    value,
+    prediction,
+    isOfficial
+  }: {
+    rank: 1 | 2 | 3;
+    value?: string;
+    prediction?: string;
+    isOfficial?: boolean;
+  }) {
     const v = value?.trim() ? value : 'Por definir';
     const isWinner = rank === 1;
     const icon = isWinner ? <CrownIcon className="h-5 w-5" /> : <BallIcon className="h-5 w-5" />;
@@ -307,12 +364,17 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
       >
         <div className="flex items-center justify-center gap-2 text-[color:var(--pc-muted)] text-sm font-medium">
           <span className={isWinner ? 'text-[color:var(--pc-accent)]' : 'text-[color:var(--pc-muted)]'}>{icon}</span>
-          Por definir
+          {isOfficial ? 'Resultado oficial' : 'Por definir'}
         </div>
         <div className="mt-2 text-[color:var(--pc-text-on-dark)] text-2xl font-bold">{rank}</div>
         <div className="mt-3 text-[color:var(--pc-text-on-dark)] text-xl sm:text-2xl font-semibold tracking-tight leading-tight">
           {v}
         </div>
+        {prediction?.trim() && (
+          <div className="mt-2 text-xs sm:text-sm text-[color:var(--pc-muted)]/80">
+            Tu pronóstico: ({prediction})
+          </div>
+        )}
       </div>
     );
   }
@@ -320,13 +382,17 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
   function BonusCard({
     title,
     value,
+    prediction,
     icon,
-    accent
+    accent,
+    isOfficial
   }: {
     title: React.ReactNode;
     value?: string;
+    prediction?: string;
     icon?: React.ReactNode;
     accent?: boolean;
+    isOfficial?: boolean;
   }) {
     const v = value?.trim() ? value : 'Por definir';
     return (
@@ -337,11 +403,16 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
       >
         <div className="flex items-center justify-center gap-2 text-[color:var(--pc-muted)] text-sm font-medium">
           {icon ? <span className="text-[color:var(--pc-accent)]">{icon}</span> : null}
-          {title}
+          {isOfficial ? 'Resultado oficial' : title}
         </div>
         <div className="mt-3 text-[color:var(--pc-text-on-dark)] text-2xl font-semibold tracking-tight leading-tight">
           {v}
         </div>
+        {prediction?.trim() && (
+          <div className="mt-2 text-xs sm:text-sm text-[color:var(--pc-muted)]/80">
+            Tu pronóstico: ({prediction})
+          </div>
+        )}
       </div>
     );
   }
@@ -377,7 +448,12 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
             {b.hasWinner && (
               <div className="flex justify-center">
                 <div className="w-full max-w-2xl">
-                  <PodiumCard rank={1} value={display.winner} />
+                  <PodiumCard
+                    rank={1}
+                    value={winnerValue}
+                    prediction={officialWinner ? winnerPrediction : undefined}
+                    isOfficial={Boolean(officialWinner)}
+                  />
                 </div>
               </div>
             )}
@@ -386,12 +462,22 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
               <div className="grid grid-cols-2 gap-4 items-stretch">
                 <div className="w-full">
                   {b.hasRunnerUp && (
-                    <PodiumCard rank={2} value={display.runnerUp} />
+                    <PodiumCard
+                      rank={2}
+                      value={runnerUpValue}
+                      prediction={officialRunnerUp ? runnerUpPrediction : undefined}
+                      isOfficial={Boolean(officialRunnerUp)}
+                    />
                   )}
                 </div>
                 <div className="w-full">
                   {b.hasThirdPlace && (
-                    <PodiumCard rank={3} value={display.thirdPlace} />
+                    <PodiumCard
+                      rank={3}
+                      value={thirdPlaceValue}
+                      prediction={officialThirdPlace ? thirdPlacePrediction : undefined}
+                      isOfficial={Boolean(officialThirdPlace)}
+                    />
                   )}
                 </div>
               </div>
@@ -401,10 +487,22 @@ export default function BonusPredictionsForm({ groupId, group }: BonusPrediction
 
         <div className="grid gap-4 sm:grid-cols-2">
           {b.hasTopScorer && (
-            <BonusCard title="Por definir Goleador" value={display.topScorer} icon={<BallIcon className="h-5 w-5" />} />
+            <BonusCard
+              title="Por definir Goleador"
+              value={topScorerValue}
+              prediction={officialTopScorer ? topScorerPrediction : undefined}
+              icon={<BallIcon className="h-5 w-5" />}
+              isOfficial={Boolean(officialTopScorer)}
+            />
           )}
           {b.hasTopAssister && (
-            <BonusCard title="Por definir Asistidor" value={display.topAssister} icon={<BallIcon className="h-5 w-5" />} />
+            <BonusCard
+              title="Por definir Asistidor"
+              value={topAssisterValue}
+              prediction={officialTopAssister ? topAssisterPrediction : undefined}
+              icon={<BallIcon className="h-5 w-5" />}
+              isOfficial={Boolean(officialTopAssister)}
+            />
           )}
         </div>
       </div>

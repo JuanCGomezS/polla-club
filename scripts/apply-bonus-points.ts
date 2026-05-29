@@ -15,14 +15,34 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-function matchBonusValue(pred?: string, result?: string): boolean {
-  if (pred == null || result == null || pred === '' || result === '') return false;
-  return pred.trim().toLowerCase() === result.trim().toLowerCase();
+function normalize(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function toCandidates(value?: string | string[]): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.map((v) => normalize(String(v))).filter(Boolean);
+  }
+  return String(value)
+    .split(',')
+    .map((v) => normalize(v))
+    .filter(Boolean);
+}
+
+function hasAnyCandidate(value?: string | string[]): boolean {
+  return toCandidates(value).length > 0;
+}
+
+function matchBonusValue(pred?: string, result?: string | string[]): boolean {
+  if (pred == null || pred === '') return false;
+  const normalizedPrediction = normalize(pred);
+  return toCandidates(result).includes(normalizedPrediction);
 }
 
 function calculateBonusPoints(
   prediction: { winner?: string; runnerUp?: string; thirdPlace?: string; topScorer?: string; topAssister?: string },
-  results: { winner?: string; runnerUp?: string; thirdPlace?: string; topScorer?: string; topAssister?: string },
+  results: { winner?: string; runnerUp?: string; thirdPlace?: string; topScorer?: string | string[]; topAssister?: string | string[] },
   settings: { pointsWinnerBonus?: number; pointsRunnerUp?: number; pointsThirdPlace?: number; pointsTopScorer?: number; pointsTopAssister?: number }
 ): { points: number; breakdown: { winner: number; runnerUp: number; thirdPlace: number; topScorer: number; topAssister: number } } {
   const breakdown = { winner: 0, runnerUp: 0, thirdPlace: 0, topScorer: 0, topAssister: 0 };
@@ -36,10 +56,10 @@ function calculateBonusPoints(
   if (results.thirdPlace != null && results.thirdPlace !== '' && settings.pointsThirdPlace && matchBonusValue(prediction.thirdPlace, results.thirdPlace)) {
     points += settings.pointsThirdPlace; breakdown.thirdPlace = settings.pointsThirdPlace;
   }
-  if (results.topScorer != null && results.topScorer !== '' && settings.pointsTopScorer && matchBonusValue(prediction.topScorer, results.topScorer)) {
+  if (hasAnyCandidate(results.topScorer) && settings.pointsTopScorer && matchBonusValue(prediction.topScorer, results.topScorer)) {
     points += settings.pointsTopScorer; breakdown.topScorer = settings.pointsTopScorer;
   }
-  if (results.topAssister != null && results.topAssister !== '' && settings.pointsTopAssister && matchBonusValue(prediction.topAssister, results.topAssister)) {
+  if (hasAnyCandidate(results.topAssister) && settings.pointsTopAssister && matchBonusValue(prediction.topAssister, results.topAssister)) {
     points += settings.pointsTopAssister; breakdown.topAssister = settings.pointsTopAssister;
   }
   return { points, breakdown };
@@ -117,8 +137,8 @@ if (!serviceAccount) {
       (results.winner != null && results.winner !== '') ||
       (results.runnerUp != null && results.runnerUp !== '') ||
       (results.thirdPlace != null && results.thirdPlace !== '') ||
-      (results.topScorer != null && results.topScorer !== '') ||
-      (results.topAssister != null && results.topAssister !== '');
+      hasAnyCandidate(results.topScorer) ||
+      hasAnyCandidate(results.topAssister);
     if (!hasAny) {
       console.error('❌ Los resultados están vacíos. Establece al menos ganador/subcampeón/etc. con set-competition-results.ts');
       process.exit(1);
