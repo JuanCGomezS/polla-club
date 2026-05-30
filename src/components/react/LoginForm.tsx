@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { registerUser, loginUser, sendPasswordReset } from '../../lib/auth';
 import { getRoute } from '../../lib/utils';
+import TermsAndConditionsModal from './TermsAndConditionsModal';
 
 export default function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resetSent, setResetSent] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,6 +31,11 @@ export default function LoginForm() {
         await loginUser(email, password);
         window.location.href = getRoute('/groups');
       } else {
+        if (!acceptedTerms) {
+          setError('Debes aceptar los términos y condiciones para registrarte');
+          setLoading(false);
+          return;
+        }
         if (!displayName.trim()) {
           setError('El nombre es requerido');
           setLoading(false);
@@ -97,22 +105,45 @@ export default function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && !forgotPassword && (
-          <div>
-            <label
-              htmlFor="displayName"
-              className="block text-sm font-medium text-[color:var(--pc-muted)] mb-1"
-            >
-              Nombre
+          <>
+            <div>
+              <label
+                htmlFor="displayName"
+                className="block text-sm font-medium text-[color:var(--pc-muted)] mb-1"
+              >
+                Nombre
+              </label>
+              <input
+                type="text"
+                id="displayName"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full px-3 py-2 border border-[color:var(--pc-main-dark)]/60 rounded-md bg-[color:var(--pc-surface)] text-[color:var(--pc-text-on-dark)] focus:outline-none focus:ring-2 focus:ring-[color:var(--pc-accent)]"
+                required={!isLogin}
+              />
+            </div>
+
+            <label className="flex items-start gap-2 text-sm text-[color:var(--pc-muted)]">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-[color:var(--pc-main-dark)]/70 bg-[color:var(--pc-surface)]"
+                required={!isLogin}
+              />
+              <span>
+                Acepto los{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsTermsModalOpen(true)}
+                  className="text-[color:var(--pc-accent)] hover:text-[color:var(--pc-accent-dark)] underline"
+                >
+                  términos y condiciones
+                </button>
+                .
+              </span>
             </label>
-            <input
-              type="text"
-              id="displayName"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full px-3 py-2 border border-[color:var(--pc-main-dark)]/60 rounded-md bg-[color:var(--pc-surface)] text-[color:var(--pc-text-on-dark)] focus:outline-none focus:ring-2 focus:ring-[color:var(--pc-accent)]"
-              required={!isLogin}
-            />
-          </div>
+          </>
         )}
 
         <div>
@@ -208,6 +239,11 @@ export default function LoginForm() {
           </button>
         )}
       </div>
+
+      <TermsAndConditionsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+      />
     </div>
   );
 }

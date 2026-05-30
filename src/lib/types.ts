@@ -177,8 +177,8 @@ export interface CompetitionResult {
   winner?: string;
   runnerUp?: string;
   thirdPlace?: string;
-  topScorer?: string;
-  topAssister?: string;
+  topScorer?: string | string[];
+  topAssister?: string | string[];
   isLocked: boolean;
   lockedAt?: Timestamp;
   updatedAt: Timestamp;

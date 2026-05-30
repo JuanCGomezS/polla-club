@@ -106,8 +106,8 @@ export async function setCompetitionResults(
     winner?: string;
     runnerUp?: string;
     thirdPlace?: string;
-    topScorer?: string;
-    topAssister?: string;
+    topScorer?: string | string[];
+    topAssister?: string | string[];
     isLocked?: boolean;
   }
 ): Promise<void> {

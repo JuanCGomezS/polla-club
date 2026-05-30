@@ -4,19 +4,19 @@ type PhaseId = 'before' | 'during';
 
 const steps = [
   {
-    title: '1. Crea o únete a un grupo',
+    title: '1. Activa tu plan y crea el grupo',
     description:
-      'Arma una polla con tus amigos creando un grupo nuevo o únete a uno existente con un código de invitación.',
+      'Para jugar primero debes activar un plan. Con ese pago se habilita la creación del grupo y el acceso a toda la gestión de la polla.',
   },
   {
-    title: '2. Haz tus pronósticos',
+    title: '2. Invita participantes y registren sus pronósticos',
     description:
-      'Pronostica marcador de cada partido y completa los pronósticos bonus (campeón, goleador, etc.) antes de que cierren.',
+      'Comparte enlace y código del grupo para que todos se inscriban. Cada participante puede cargar y editar marcadores y bonus hasta el cierre automático.',
   },
   {
-    title: '3. Suma puntos y compite',
+    title: '3. PollaClub bloquea, calcula y ordena',
     description:
-      'A medida que se juegan los partidos, PollaClub calcula automáticamente los puntos y actualiza la tabla de posiciones.',
+      'Cuando inician los partidos se bloquean los campos. La plataforma aplica reglas, calcula puntajes y actualiza la tabla de posiciones automáticamente.',
   },
 ];
 
@@ -26,10 +26,10 @@ const phases: { id: PhaseId; label: string; title: string; items: string[] }[] =
     label: 'Antes del torneo',
     title: 'Lo que haces antes de que ruede el balón',
     items: [
-      'Elige la competición disponible (Champions, Mundial, etc.) y crea o únete a un grupo.',
-      'Pronostica todos los partidos que ya estén programados.',
-      'Completa los pronósticos bonus: campeón, segundo puesto, máximo goleador, asistidor, según lo que permita tu grupo.',
-      'Verifica las fechas límite: una vez que empieza un partido o se bloquea un bonus, ya no se puede editar ese pronóstico.',
+      'El administrador crea el grupo después de activar su plan y define la competición.',
+      'Invita participantes enviando el enlace y el código del grupo.',
+      'Cada participante registra sus marcadores y sus bonus (campeón, 2do, 3ro, goleador, asistidor) según la configuración del grupo.',
+      'Los pronósticos se pueden editar hasta el momento de bloqueo automático.',
     ],
   },
   {
@@ -37,10 +37,10 @@ const phases: { id: PhaseId; label: string; title: string; items: string[] }[] =
     label: 'Durante el torneo',
     title: 'Cómo se vive mientras se juega',
     items: [
-      'Los resultados de los partidos se van cargando en la plataforma.',
-      'Tus puntos se calculan automáticamente según las reglas de puntaje del grupo.',
-      'Puedes revisar la tabla de posiciones del grupo y ver cómo van tus amigos.',
-      'Sigue haciendo pronósticos de los nuevos partidos que se habiliten mientras avanza la competición.',
+      'Cada partido se bloquea justo en su hora de inicio (por ejemplo, si empieza 7:00 pm, 7:00 pm queda cerrado).',
+      'Los marcadores pronosticados y evaluados corresponden a los 90 minutos reglamentarios.',
+      'Esto también aplica en fases finales desde octavos en adelante: solo se pronostica marcador de tiempo reglamentario.',
+      'PollaClub se encarga de aplicar reglas, bloquear campos, calcular puntos y actualizar tabla de posiciones.',
     ],
   },
 ];
@@ -130,17 +130,16 @@ export default function HowItWorks() {
             <p className="font-semibold">Reglas generales de los puntos</p>
             <ul className="list-disc list-inside space-y-1">
               <li>
-                Cada grupo define cuántos puntos se dan por acertar marcador exacto, ganador,
-                diferencia de gol y pronósticos bonus.
-              </li>
-              <li>Los puntos se suman automáticamente cuando se carga el resultado oficial.</li>
-              <li>
-                No se pueden editar pronósticos de un partido que ya empezó o finalizó, ni bonus
-                que ya están bloqueados.
+                Cada grupo define su puntaje: marcador exacto, ganador, diferencia de gol y
+                pronósticos bonus.
               </li>
               <li>
-                Puedes ver en cualquier momento tu posición en la tabla y comparar con tus amigos.
+                Los puntos se suman automáticamente cuando se cargan los resultados oficiales.
               </li>
+              <li>
+                La premiación no la gestiona PollaClub: cada grupo la define internamente.
+              </li>
+              <li>Puedes ver en cualquier momento la tabla y comparar posiciones con el grupo.</li>
             </ul>
           </div>
         </div>
@@ -148,4 +147,3 @@ export default function HowItWorks() {
     </section>
   );
 }
-

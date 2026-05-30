@@ -5,6 +5,8 @@
  * Uso:
  *   npx tsx scripts/set-competition-results.ts <competitionId> [--winner "Argentina"] [--runner-up "Francia"] [--third-place "Croacia"] [--top-scorer "Jugador"] [--top-assister "Jugador"] [--lock]
  *   npx tsx scripts/set-competition-results.ts mundial-2026 --winner "Francia" --runner-up "España" --third-place "Colombia" --top-scorer "Kylian Mbappé" --top-assister "Kevin De Bruyne"
+ *   En caso de empate en goleador/asistidor, puedes repetir bandera o usar coma:
+ *   npx tsx scripts/set-competition-results.ts mundial-2026 --top-scorer "Messi" --top-scorer "Ronaldo" --top-assister "Modric, De Bruyne"
  *   Los valores deben coincidir con lo que los usuarios eligieron (nombres de equipos/jugadores).
  *
  * Ejemplo:
@@ -49,30 +51,39 @@ if (!serviceAccount) {
 
   const db = admin.firestore();
 
-  function parseArgs(): { competitionId: string; winner?: string; runnerUp?: string; thirdPlace?: string; topScorer?: string; topAssister?: string; isLocked: boolean } {
+  function splitList(value: string): string[] {
+    return value.split(',').map((v) => v.trim()).filter(Boolean);
+  }
+
+  function parseArgs(): { competitionId: string; winner?: string; runnerUp?: string; thirdPlace?: string; topScorers: string[]; topAssisters: string[]; isLocked: boolean } {
     const args = process.argv.slice(2);
     const competitionId = args[0];
     if (!competitionId) {
       console.error('Uso: npx tsx scripts/set-competition-results.ts <competitionId> [--winner "X"] [--runner-up "X"] ... [--lock]');
       process.exit(1);
     }
-    const result: { competitionId: string; winner?: string; runnerUp?: string; thirdPlace?: string; topScorer?: string; topAssister?: string; isLocked: boolean } = {
+    const result: { competitionId: string; winner?: string; runnerUp?: string; thirdPlace?: string; topScorers: string[]; topAssisters: string[]; isLocked: boolean } = {
       competitionId,
+      topScorers: [],
+      topAssisters: [],
       isLocked: false
     };
     for (let i = 1; i < args.length; i++) {
       if (args[i] === '--winner' && args[i + 1]) { result.winner = args[++i]; continue; }
       if (args[i] === '--runner-up' && args[i + 1]) { result.runnerUp = args[++i]; continue; }
       if (args[i] === '--third-place' && args[i + 1]) { result.thirdPlace = args[++i]; continue; }
-      if (args[i] === '--top-scorer' && args[i + 1]) { result.topScorer = args[++i]; continue; }
-      if (args[i] === '--top-assister' && args[i + 1]) { result.topAssister = args[++i]; continue; }
+      if (args[i] === '--top-scorer' && args[i + 1]) { result.topScorers.push(...splitList(args[++i])); continue; }
+      if (args[i] === '--top-assister' && args[i + 1]) { result.topAssisters.push(...splitList(args[++i])); continue; }
       if (args[i] === '--lock') { result.isLocked = true; }
     }
     return result;
   }
 
+  // npx tsx scripts/set-competition-results.ts mundial-2026 \
+  // --top-scorer "Antoine Griezmann" --top-scorer "Erling Haaland" \
+  // --top-assister "Antoine Griezmann"
   async function main() {
-    const { competitionId, winner, runnerUp, thirdPlace, topScorer, topAssister, isLocked } = parseArgs();
+    const { competitionId, winner, runnerUp, thirdPlace, topScorers, topAssisters, isLocked } = parseArgs();
     const resultsRef = db.collection('competitions').doc(competitionId).collection('results').doc('main');
     const data: Record<string, unknown> = {
       id: 'main',
@@ -82,8 +93,8 @@ if (!serviceAccount) {
     if (winner !== undefined) data.winner = winner;
     if (runnerUp !== undefined) data.runnerUp = runnerUp;
     if (thirdPlace !== undefined) data.thirdPlace = thirdPlace;
-    if (topScorer !== undefined) data.topScorer = topScorer;
-    if (topAssister !== undefined) data.topAssister = topAssister;
+    if (topScorers.length > 0) data.topScorer = topScorers.length === 1 ? topScorers[0] : topScorers;
+    if (topAssisters.length > 0) data.topAssister = topAssisters.length === 1 ? topAssisters[0] : topAssisters;
     if (isLocked !== undefined) data.isLocked = isLocked;
 
     const snap = await resultsRef.get();
