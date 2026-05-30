@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { useEffect, useState, useMemo } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { batchGetUsers, getCurrentUser } from '../../lib/auth';
 import { calculateUserTotalPoints, calculatePredictionPoints } from '../../lib/points';
@@ -27,16 +27,11 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
   const [leaderboard, setLeaderboard] = useState<GroupLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [finishedMatches, setFinishedMatches] = useState<FinishedMatchesData>({
-    ids: new Set(),
-    map: new Map()
-  });
+  const [finishedMatches, setFinishedMatches] = useState<FinishedMatchesData>({ ids: new Set(), map: new Map() });
   const [usersMap, setUsersMap] = useState<Map<string, UserType>>(new Map());
   const [selectedEntry, setSelectedEntry] = useState<GroupLeaderboardEntry | null>(null);
-  const predictionsByUserRef = useRef<Map<string, Prediction[]>>(new Map());
-  const bonusByUserRef = useRef<Map<string, BonusPrediction>>(new Map());
-  const usersMapRef = useRef<Map<string, UserType>>(new Map());
-  const buildEntriesRef = useRef<(() => void) | null>(null);
+  const [predictionsByUser, setPredictionsByUser] = useState<Map<string, Prediction[]>>(new Map());
+  const [bonusByUser, setBonusByUser] = useState<Map<string, BonusPrediction>>(new Map());
 
   const allUserIds = useMemo(
     () => [...new Set([...group.participants, group.adminUid])],
@@ -45,151 +40,110 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
 
   useEffect(() => {
     let cancelled = false;
-    batchGetUsers(allUserIds).then((map) => {
-      if (!cancelled) setUsersMap(map);
-    });
-    return () => { cancelled = true; };
-  }, [groupId, allUserIds.join(',')]);
 
-  useEffect(() => {
-    usersMapRef.current = usersMap;
-    if (buildEntriesRef.current) {
-      buildEntriesRef.current();
-    }
-  }, [usersMap]);
+    async function loadLeaderboard() {
+      setLoading(true);
+      setError('');
 
-  useEffect(() => {
-    const matchesRef = collection(db, 'competitions', group.competitionId, 'matches');
-    const matchesQuery = query(
-      matchesRef
-    );
+      try {
+        const usersPromise = batchGetUsers(allUserIds);
+        const matchesPromise = getDocs(
+          query(
+            collection(db, 'competitions', group.competitionId, 'matches'),
+            where('status', '==', 'finished')
+          )
+        );
+        const predictionsPromise = getDocs(collection(db, 'groups', groupId, 'predictions'));
+        const bonusPromise = getDocs(collection(db, 'groups', groupId, 'bonusPredictions'));
 
-    const unsubscribeMatches = onSnapshot(
-      matchesQuery,
-      (snapshot) => {
-        const finishedList: Match[] = [];
-        const newMap = new Map<string, Match>();
-        snapshot.forEach((doc) => {
+        const [resolvedUsersMap, matchesSnapshot, predictionsSnapshot, bonusSnapshot] = await Promise.all([
+          usersPromise,
+          matchesPromise,
+          predictionsPromise,
+          bonusPromise
+        ]);
+
+        if (cancelled) return;
+
+        const finishedMap = new Map<string, Match>();
+        matchesSnapshot.forEach((doc) => {
           const match = { id: doc.id, ...doc.data() } as Match;
-          if (match.status === 'finished') {
-            finishedList.push(match);
-            newMap.set(match.id, match);
-          }
+          finishedMap.set(match.id, match);
         });
-        setFinishedMatches({
-          ids: new Set(finishedList.map((m) => m.id)),
-          map: newMap
-        });
-      },
-      (err) => setError(err.message)
-    );
 
-    return () => unsubscribeMatches();
-  }, [group.competitionId]);
-
-  useEffect(() => {
-    if (finishedMatches.ids.size === 0) {
-      const entries: GroupLeaderboardEntry[] = allUserIds.map((userId) => {
-        const user = usersMap.get(userId);
-        const userName = user?.displayName ?? `Usuario ${userId.substring(0, 8)}...`;
-        return {
-          userId,
-          userName,
-          totalPoints: 0,
-          predictionsCount: 0,
-          rank: 0
-        };
-      });
-      entries.sort((a, b) => a.userName.localeCompare(b.userName));
-      entries.forEach((e, i) => { e.rank = i + 1; });
-      setLeaderboard(entries);
-      setLoading(false);
-      return;
-    }
-
-    function buildEntries() {
-      const predictionsByUser = predictionsByUserRef.current;
-      const bonusByUser = bonusByUserRef.current;
-      const entries: GroupLeaderboardEntry[] = allUserIds.map((userId) => {
-        const user = usersMapRef.current.get(userId);
-        const userName = user?.displayName ?? `Usuario ${userId.substring(0, 8)}...`;
-        const userPredictions = predictionsByUser.get(userId) ?? [];
-        const matchPoints = calculateUserTotalPoints(userPredictions);
-        const bonusPoints = bonusByUser.get(userId)?.points ?? 0;
-        return {
-          userId,
-          userName,
-          totalPoints: matchPoints + bonusPoints,
-          predictionsCount: 0,
-          rank: 0
-        };
-      });
-      entries.sort((a, b) =>
-        b.totalPoints !== a.totalPoints
-          ? b.totalPoints - a.totalPoints
-          : a.userName.localeCompare(b.userName)
-      );
-      entries.forEach((e, i) => {
-        e.rank = i + 1;
-      });
-      setLeaderboard(entries);
-      setLoading(false);
-    }
-    buildEntriesRef.current = buildEntries;
-
-    const predictionsRef = collection(db, 'groups', groupId, 'predictions');
-    const unsubPredictions = onSnapshot(
-      predictionsRef,
-      (snapshot) => {
-        const predictionsByUser = new Map<string, Prediction[]>();
-        snapshot.forEach((doc) => {
+        const finishedIds = new Set(finishedMap.keys());
+        const nextPredictionsByUser = new Map<string, Prediction[]>();
+        predictionsSnapshot.forEach((doc) => {
           const prediction = { id: doc.id, ...doc.data() } as Prediction;
-          if (!finishedMatches.ids.has(prediction.matchId)) return;
-          const match = finishedMatches.map.get(prediction.matchId);
+          if (!finishedIds.has(prediction.matchId)) return;
+
+          const match = finishedMap.get(prediction.matchId);
           if (!prediction.points && match?.result) {
-            const calculated = calculatePredictionPoints(
-              prediction,
-              match.result,
-              group.settings
-            );
+            const calculated = calculatePredictionPoints(prediction, match.result, group.settings);
             prediction.points = calculated.points;
             prediction.pointsBreakdown = calculated.breakdown;
           }
-          const userId = prediction.userId;
-          if (!predictionsByUser.has(userId)) predictionsByUser.set(userId, []);
-          predictionsByUser.get(userId)!.push(prediction);
-        });
-        predictionsByUserRef.current = predictionsByUser;
-        buildEntries();
-      },
-      (err) => {
-        setError(err.message);
-        setLoading(false);
-      }
-    );
 
-    const bonusRef = collection(db, 'groups', groupId, 'bonusPredictions');
-    const unsubBonus = onSnapshot(
-      bonusRef,
-      (snapshot) => {
-        const bonusByUser = new Map<string, BonusPrediction>();
-        snapshot.forEach((doc) => {
+          const userId = prediction.userId;
+          if (!nextPredictionsByUser.has(userId)) nextPredictionsByUser.set(userId, []);
+          nextPredictionsByUser.get(userId)!.push(prediction);
+        });
+
+        const nextBonusByUser = new Map<string, BonusPrediction>();
+        bonusSnapshot.forEach((doc) => {
           const bonus = { id: doc.id, ...doc.data() } as BonusPrediction;
           if (bonus.userId != null) {
-            bonusByUser.set(bonus.userId, bonus);
+            nextBonusByUser.set(bonus.userId, bonus);
           }
         });
-        bonusByUserRef.current = bonusByUser;
-        buildEntries();
+
+        const entries: GroupLeaderboardEntry[] = allUserIds.map((userId) => {
+          const user = resolvedUsersMap.get(userId);
+          const userName = user?.displayName ?? `Usuario ${userId.substring(0, 8)}...`;
+          const userPredictions = nextPredictionsByUser.get(userId) ?? [];
+          const matchPoints = calculateUserTotalPoints(userPredictions);
+          const bonusPoints = nextBonusByUser.get(userId)?.points ?? 0;
+
+          return {
+            userId,
+            userName,
+            totalPoints: matchPoints + bonusPoints,
+            predictionsCount: 0,
+            rank: 0
+          };
+        });
+
+        entries.sort((a, b) =>
+          b.totalPoints !== a.totalPoints
+            ? b.totalPoints - a.totalPoints
+            : a.userName.localeCompare(b.userName)
+        );
+        entries.forEach((entry, index) => {
+          entry.rank = index + 1;
+        });
+
+        setUsersMap(resolvedUsersMap);
+        setFinishedMatches({ ids: finishedIds, map: finishedMap });
+        setPredictionsByUser(nextPredictionsByUser);
+        setBonusByUser(nextBonusByUser);
+        setLeaderboard(entries);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Error al cargar tabla general');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    );
+    }
+
+    loadLeaderboard();
 
     return () => {
-      buildEntriesRef.current = null;
-      unsubPredictions();
-      unsubBonus();
+      cancelled = true;
     };
-  }, [groupId, allUserIds, group.settings, finishedMatches]);
+  }, [groupId, group.competitionId, allUserIds.join(','), group.settings]);
 
   if (loading) {
     return (
@@ -303,8 +257,8 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
           onClose={() => setSelectedEntry(null)}
           userName={selectedEntry.userName}
           avatarUrl={usersMap.get(selectedEntry.userId)?.avatarUrl}
-          predictions={predictionsByUserRef.current.get(selectedEntry.userId) ?? []}
-          bonus={bonusByUserRef.current.get(selectedEntry.userId)}
+          predictions={predictionsByUser.get(selectedEntry.userId) ?? []}
+          bonus={bonusByUser.get(selectedEntry.userId)}
           matchesMap={finishedMatches.map}
           competitionId={group.competitionId}
         />
