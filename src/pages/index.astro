@@ -3,6 +3,7 @@ import PricingSection from "../components/PricingSection.astro";
 import HeroCarousel from "../components/react/HeroCarousel";
 import HomeGroupsLink from "../components/react/HomeGroupsLink";
 import HowItWorks from "../components/react/HowItWorks";
+import HomeTermsCard from "../components/react/HomeTermsCard";
 import Layout from "../layouts/Layout.astro";
 import { getCarouselSlidesFromPublic } from "../lib/carousel-public";
 
@@ -36,6 +37,7 @@ const carouselSlides = getCarouselSlidesFromPublic();
 
     <div class="max-w-6xl mx-auto px-4 pb-10">
       <HowItWorks client:load />
+      <HomeTermsCard client:load />
       <PricingSection />
     </div>
   </main>
