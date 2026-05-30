@@ -1,4 +1,4 @@
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { batchGetUsers, getCurrentUser } from '../../lib/auth';
 import { db } from '../../lib/firebase';
@@ -24,98 +24,104 @@ export default function MatchLeaderboard({ groupId, match, group }: MatchLeaderb
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!match.result) {
       setLoading(false);
       return;
     }
 
-    const predictionsRef = collection(db, 'groups', groupId, 'predictions');
-    const predictionsQuery = query(
-      predictionsRef,
-      where('matchId', '==', match.id)
-    );
+    async function loadLeaderboard() {
+      setLoading(true);
+      setError('');
 
-    const unsubscribe = onSnapshot(
-      predictionsQuery,
-      async (snapshot) => {
-        try {
-          const predictions: Prediction[] = [];
-          snapshot.forEach((doc) => {
-            predictions.push({ id: doc.id, ...doc.data() } as Prediction);
-          });
+      try {
+        const predictionsRef = collection(db, 'groups', groupId, 'predictions');
+        const predictionsQuery = query(predictionsRef, where('matchId', '==', match.id));
+        const snapshot = await getDocs(predictionsQuery);
 
-          if (predictions.length === 0) {
-            setLeaderboard([]);
-            setLoading(false);
-            return;
+        if (cancelled) return;
+
+        const predictions: Prediction[] = [];
+        snapshot.forEach((doc) => {
+          predictions.push({ id: doc.id, ...doc.data() } as Prediction);
+        });
+
+        if (predictions.length === 0) {
+          setLeaderboard([]);
+          setUsersMap(new Map());
+          setLoading(false);
+          return;
+        }
+
+        const userIds = [...new Set(predictions.map((p) => p.userId))];
+        const map = await batchGetUsers(userIds);
+
+        if (cancelled) return;
+
+        setUsersMap(map);
+
+        const entries: MatchLeaderboardEntry[] = predictions.map((prediction) => {
+          let points = prediction.points || 0;
+
+          if (!prediction.points && match.result) {
+            const calculated = calculatePredictionPoints(prediction, match.result, group.settings);
+            points = calculated.points;
           }
 
-          const userIds = [...new Set(predictions.map(p => p.userId))];
-          const map = await batchGetUsers(userIds);
-          setUsersMap(map);
+          const user = map.get(prediction.userId);
+          return {
+            userId: prediction.userId,
+            userName: user?.displayName || `Usuario ${prediction.userId.substring(0, 8)}...`,
+            prediction,
+            points,
+            rank: 0
+          };
+        });
 
-          const entries: MatchLeaderboardEntry[] = predictions.map((prediction) => {
-            let points = prediction.points || 0;
+        entries.sort((a, b) => {
+          if (b.points !== a.points) {
+            return b.points - a.points;
+          }
 
-            if (!prediction.points && match.result) {
-              const calculated = calculatePredictionPoints(
-                prediction,
-                match.result,
-                group.settings
-              );
-              points = calculated.points;
-            }
+          const actualTeam1 = match.result!.team1Score;
+          const actualTeam2 = match.result!.team2Score;
 
-            const user = map.get(prediction.userId);
-            return {
-              userId: prediction.userId,
-              userName: user?.displayName || `Usuario ${prediction.userId.substring(0, 8)}...`,
-              prediction,
-              points,
-              rank: 0
-            };
-          });
+          const distanceA =
+            Math.abs(a.prediction.team1Score - actualTeam1) +
+            Math.abs(a.prediction.team2Score - actualTeam2);
+          const distanceB =
+            Math.abs(b.prediction.team1Score - actualTeam1) +
+            Math.abs(b.prediction.team2Score - actualTeam2);
 
-          entries.sort((a, b) => {
-            if (b.points !== a.points) {
-              return b.points - a.points;
-            }
+          if (distanceA !== distanceB) {
+            return distanceA - distanceB;
+          }
 
-            const actualTeam1 = match.result!.team1Score;
-            const actualTeam2 = match.result!.team2Score;
+          return a.userName.localeCompare(b.userName);
+        });
 
-            const distanceA =
-              Math.abs(a.prediction.team1Score - actualTeam1) +
-              Math.abs(a.prediction.team2Score - actualTeam2);
-            const distanceB =
-              Math.abs(b.prediction.team1Score - actualTeam1) +
-              Math.abs(b.prediction.team2Score - actualTeam2);
+        entries.forEach((entry, index) => {
+          entry.rank = index + 1;
+        });
 
-            if (distanceA !== distanceB) {
-              return distanceA - distanceB;
-            }
-
-            return a.userName.localeCompare(b.userName);
-          });
-
-          entries.forEach((entry, index) => {
-            entry.rank = index + 1;
-          });
-
-          setLeaderboard(entries);
-        } catch (err: unknown) {
+        setLeaderboard(entries);
+      } catch (err: unknown) {
+        if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Error al cargar tabla');
-        } finally {
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false);
         }
-      },
-      (err) => {
-        setError(err.message);
-        setLoading(false);
       }
-    );
+    }
 
-    return () => unsubscribe();
+    loadLeaderboard();
+
+    return () => {
+      cancelled = true;
+    };
   }, [groupId, match.id, match.result, group.settings]);
 
   if (!match.result) {
