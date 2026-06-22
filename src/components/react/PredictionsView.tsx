@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getCurrentUser } from '../../lib/auth';
 import { db } from '../../lib/firebase';
@@ -23,6 +23,22 @@ import BonusPredictionsForm from './BonusPredictionsForm';
 import MatchCard from './MatchCard';
 
 export type PredictionsSubTab = 'live' | 'upcoming' | 'finished' | 'bonus';
+
+function getInitialSubTab(): PredictionsSubTab | null {
+  if (typeof window === 'undefined') return null;
+
+  const requestedSubTab = new URLSearchParams(window.location.search).get('subTab');
+  if (
+    requestedSubTab === 'live' ||
+    requestedSubTab === 'upcoming' ||
+    requestedSubTab === 'finished' ||
+    requestedSubTab === 'bonus'
+  ) {
+    return requestedSubTab;
+  }
+
+  return null;
+}
 
 const FINISHED_MATCH_SORT_STORAGE_KEY = 'pollaClubFinishedMatchSort';
 
@@ -72,16 +88,48 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
   useEffect(() => {
     if (!group?.competitionId) return;
 
+    let cancelled = false;
     const matchesRef = collection(db, 'competitions', group.competitionId, 'matches');
-    const unsubscribe = onSnapshot(
-      matchesRef,
-      (snapshot) => {
-        const updatedMatches: Match[] = [];
+    getDocs(matchesRef)
+      .then((snapshot) => {
+        if (cancelled) return;
+        const loadedMatches: Match[] = [];
         snapshot.forEach((doc) => {
-          const matchData = doc.data();
-          updatedMatches.push({ ...matchData, id: doc.id } as Match);
+          loadedMatches.push({ id: doc.id, ...doc.data() } as Match);
         });
-        setMatches(updatedMatches);
+        setMatches(loadedMatches);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Error al cargar partidos:', err);
+        setError('Error al cargar partidos');
+      });
+
+    const unsubscribe = onSnapshot(
+      query(matchesRef, where('status', '==', 'live')),
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const matchId = change.doc.id;
+          if (change.type === 'removed') {
+            getDoc(doc(db, 'competitions', group.competitionId, 'matches', matchId))
+              .then((freshDoc) => {
+                if (cancelled || !freshDoc.exists()) return;
+                const freshMatch = { id: freshDoc.id, ...freshDoc.data() } as Match;
+                setMatches((prev) => prev.map((match) => match.id === freshMatch.id ? freshMatch : match));
+              })
+              .catch((err) => console.error('Error al refrescar partido finalizado:', err));
+            return;
+          }
+
+          const liveMatch = { id: matchId, ...change.doc.data() } as Match;
+          setMatches((prev) => {
+            const exists = prev.some((match) => match.id === liveMatch.id);
+            if (exists) {
+              return prev.map((match) => match.id === liveMatch.id ? liveMatch : match);
+            }
+            return [...prev, liveMatch];
+          });
+        });
       },
       (err) => {
         console.error('Error en listener de partidos:', err);
@@ -89,7 +137,10 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [group?.competitionId]);
 
   const user = getCurrentUser();
@@ -183,6 +234,88 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     }
   };
 
+  const upcomingMatches = sortMatchesByScheduledTime(filterUpcomingMatches(matches), 'asc');
+  const liveMatches = sortMatchesByScheduledTime(filterLiveMatches(matches), 'asc');
+  const finishedMatches = sortMatchesByScheduledTime(
+    filterFinishedMatches(matches),
+    finishedMatchSortOrder
+  );
+
+  const upcomingDayGroups = useMemo(
+    () => groupMatchesByLocalDayPreservingOrder(upcomingMatches),
+    [upcomingMatches]
+  );
+  const finishedDayGroups = useMemo(
+    () => groupMatchesByLocalDayPreservingOrder(finishedMatches),
+    [finishedMatches]
+  );
+
+  const defaultSubTab: PredictionsSubTab =
+    liveMatches.length > 0 ? 'live' : upcomingMatches.length > 0 ? 'upcoming' : finishedMatches.length > 0 ? 'finished' : 'bonus';
+  const [subTab, setSubTab] = useState<PredictionsSubTab>(() => getInitialSubTab() ?? 'upcoming');
+  const initialDefaultSet = useRef(false);
+
+  useEffect(() => {
+    if (getInitialSubTab()) {
+      initialDefaultSet.current = true;
+      return;
+    }
+
+    if (matches.length > 0 && !initialDefaultSet.current) {
+      initialDefaultSet.current = true;
+      setSubTab(defaultSubTab);
+    }
+  }, [matches.length, defaultSubTab]);
+
+  const setSubTabPersisted = (nextSubTab: PredictionsSubTab) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('subTab', nextSubTab);
+    window.history.pushState({}, '', url.toString());
+    setSubTab(nextSubTab);
+  };
+
+  useEffect(() => {
+    setSubTab((current) => {
+      if (current === 'live' && liveMatches.length === 0) return defaultSubTab;
+      if (current === 'upcoming' && upcomingMatches.length === 0) return defaultSubTab;
+      if (current === 'finished' && finishedMatches.length === 0) return defaultSubTab;
+      return current;
+    });
+  }, [liveMatches.length, upcomingMatches.length, finishedMatches.length, defaultSubTab]);
+
+  const subTabs: { id: PredictionsSubTab; label: string; count?: number }[] = [
+    ...(liveMatches.length > 0 ? [{ id: 'live' as const, label: 'Partidos en vivo', count: liveMatches.length }] : []),
+    { id: 'upcoming', label: 'Próximos partidos', count: upcomingMatches.length },
+    { id: 'finished', label: 'Partidos finalizados', count: finishedMatches.length },
+    { id: 'bonus', label: 'Pronósticos bonus' },
+  ];
+
+  const freeSlots = group ? getFreeSlotCount(group) : 0;
+  const freeAllowedIds = useMemo(() => {
+    if (!group) return null;
+    if (!isFreeSlotPlan(group) || freeSlots <= 0) return null;
+    if (group.freeMatchIds?.length) {
+      return new Set(group.freeMatchIds);
+    }
+    return new Set(computeFreeMatchIds(matches, freeSlots));
+  }, [group, matches, freeSlots]);
+
+  const getLockMessage = (match: Match): string | undefined => {
+    if (!group) return undefined;
+    if (isFreeSlotPlan(group) && freeAllowedIds && !freeAllowedIds.has(match.id)) {
+      return `La prueba gratuita solo incluye ${freeSlots} partidos fijados para este grupo. Actualiza tu plan para seguir pronosticando.`;
+    }
+    const cap = Number(group.maxMatchNumber || 0);
+    if (!isFreeSlotPlan(group) && cap > 0 && match.matchNumber > cap) {
+      return `Tu plan actual permite jugar solo hasta el partido ${cap}. Actualiza tu plan para seguir pronosticando.`;
+    }
+    return undefined;
+  };
+
+  const lockedUpcomingMatches = upcomingMatches.filter((match) => Boolean(getLockMessage(match)));
+  const hasLockedUpcomingMatches = lockedUpcomingMatches.length > 0;
+  const maxMatchNumber = Number(group?.maxMatchNumber || 0);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -210,74 +343,6 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
     );
   }
 
-  const upcomingMatches = sortMatchesByScheduledTime(filterUpcomingMatches(matches), 'asc');
-  const liveMatches = sortMatchesByScheduledTime(filterLiveMatches(matches), 'asc');
-  const finishedMatches = sortMatchesByScheduledTime(
-    filterFinishedMatches(matches),
-    finishedMatchSortOrder
-  );
-
-  const upcomingDayGroups = useMemo(
-    () => groupMatchesByLocalDayPreservingOrder(upcomingMatches),
-    [upcomingMatches]
-  );
-  const finishedDayGroups = useMemo(
-    () => groupMatchesByLocalDayPreservingOrder(finishedMatches),
-    [finishedMatches]
-  );
-
-  const defaultSubTab: PredictionsSubTab =
-    liveMatches.length > 0 ? 'live' : upcomingMatches.length > 0 ? 'upcoming' : finishedMatches.length > 0 ? 'finished' : 'bonus';
-  const [subTab, setSubTab] = useState<PredictionsSubTab>('upcoming');
-  const initialDefaultSet = useRef(false);
-
-  useEffect(() => {
-    if (matches.length > 0 && !initialDefaultSet.current) {
-      initialDefaultSet.current = true;
-      setSubTab(defaultSubTab);
-    }
-  }, [matches.length, defaultSubTab]);
-
-  useEffect(() => {
-    setSubTab((current) => {
-      if (current === 'live' && liveMatches.length === 0) return defaultSubTab;
-      if (current === 'upcoming' && upcomingMatches.length === 0) return defaultSubTab;
-      if (current === 'finished' && finishedMatches.length === 0) return defaultSubTab;
-      return current;
-    });
-  }, [liveMatches.length, upcomingMatches.length, finishedMatches.length, defaultSubTab]);
-
-  const subTabs: { id: PredictionsSubTab; label: string; count?: number }[] = [
-    ...(liveMatches.length > 0 ? [{ id: 'live' as const, label: 'Partidos en vivo', count: liveMatches.length }] : []),
-    { id: 'upcoming', label: 'Próximos partidos', count: upcomingMatches.length },
-    { id: 'finished', label: 'Partidos finalizados', count: finishedMatches.length },
-    { id: 'bonus', label: 'Pronósticos bonus' },
-  ];
-
-  const freeSlots = getFreeSlotCount(group);
-  const freeAllowedIds = useMemo(() => {
-    if (!isFreeSlotPlan(group) || freeSlots <= 0) return null;
-    if (group.freeMatchIds?.length) {
-      return new Set(group.freeMatchIds);
-    }
-    return new Set(computeFreeMatchIds(matches, freeSlots));
-  }, [group, matches, freeSlots]);
-
-  const getLockMessage = (match: Match): string | undefined => {
-    if (isFreeSlotPlan(group) && freeAllowedIds && !freeAllowedIds.has(match.id)) {
-      return `La prueba gratuita solo incluye ${freeSlots} partidos fijados para este grupo. Actualiza tu plan para seguir pronosticando.`;
-    }
-    const cap = Number(group.maxMatchNumber || 0);
-    if (!isFreeSlotPlan(group) && cap > 0 && match.matchNumber > cap) {
-      return `Tu plan actual permite jugar solo hasta el partido ${cap}. Actualiza tu plan para seguir pronosticando.`;
-    }
-    return undefined;
-  };
-
-  const lockedUpcomingMatches = upcomingMatches.filter((match) => Boolean(getLockMessage(match)));
-  const hasLockedUpcomingMatches = lockedUpcomingMatches.length > 0;
-  const maxMatchNumber = Number(group.maxMatchNumber || 0);
-
   return (
     <div className="space-y-4">
       {saveError && (
@@ -292,7 +357,7 @@ export default function PredictionsView({ groupId, group: groupProp }: Predictio
           <button
             key={id}
             type="button"
-            onClick={() => setSubTab(id)}
+            onClick={() => setSubTabPersisted(id)}
             className={`px-3 py-2 text-sm font-medium rounded-t-lg transition ${
               subTab === id
                 ? 'bg-[color:var(--pc-main)] text-[color:var(--pc-text-on-dark)] border-b-2 border-[color:var(--pc-accent)] shadow-sm'

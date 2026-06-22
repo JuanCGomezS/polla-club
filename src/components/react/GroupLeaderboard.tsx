@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { batchGetUsers, getCurrentUser } from '../../lib/auth';
 import { calculateUserTotalPoints, calculatePredictionPoints } from '../../lib/points';
@@ -7,6 +7,14 @@ import PointsHistoryModal from './PointsHistoryModal';
 import type { Group, Match, Prediction, User as UserType } from '../../lib/types';
 import type { GroupLeaderboardEntry } from '../../lib/points';
 import type { BonusPrediction } from '../../lib/types';
+
+interface LeaderboardAggregateEntry extends GroupLeaderboardEntry {
+  avatarUrl?: string;
+}
+
+interface LeaderboardAggregate {
+  entries?: LeaderboardAggregateEntry[];
+}
 
 function getInitial(nameOrEmail: string): string {
   const s = (nameOrEmail || 'U').trim();
@@ -29,7 +37,9 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
   const [error, setError] = useState('');
   const [finishedMatches, setFinishedMatches] = useState<FinishedMatchesData>({ ids: new Set(), map: new Map() });
   const [usersMap, setUsersMap] = useState<Map<string, UserType>>(new Map());
+  const [avatarsByUser, setAvatarsByUser] = useState<Map<string, string>>(new Map());
   const [selectedEntry, setSelectedEntry] = useState<GroupLeaderboardEntry | null>(null);
+  const [loadingHistoryUserId, setLoadingHistoryUserId] = useState<string | null>(null);
   const [predictionsByUser, setPredictionsByUser] = useState<Map<string, Prediction[]>>(new Map());
   const [bonusByUser, setBonusByUser] = useState<Map<string, BonusPrediction>>(new Map());
 
@@ -46,6 +56,49 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
       setError('');
 
       try {
+        const aggregateSnapshot = await getDoc(doc(db, 'groups', groupId, 'leaderboard', 'main'));
+        if (aggregateSnapshot.exists()) {
+          const aggregate = aggregateSnapshot.data() as LeaderboardAggregate;
+          if (Array.isArray(aggregate.entries) && aggregate.entries.length > 0) {
+            console.info('[GroupLeaderboard] Using aggregate leaderboard', {
+              groupId,
+              entries: aggregate.entries.length
+            });
+
+            const entries = aggregate.entries
+              .map((entry, index) => ({
+                userId: entry.userId,
+                userName: entry.userName,
+                totalPoints: Number(entry.totalPoints ?? 0),
+                predictionsCount: Number(entry.predictionsCount ?? 0),
+                rank: Number(entry.rank ?? index + 1)
+              }))
+              .sort((a, b) =>
+                b.totalPoints !== a.totalPoints
+                  ? b.totalPoints - a.totalPoints
+                  : a.userName.localeCompare(b.userName)
+              );
+            entries.forEach((entry, index) => {
+              entry.rank = index + 1;
+            });
+
+            const nextAvatars = new Map<string, string>();
+            aggregate.entries.forEach((entry) => {
+              if (entry.avatarUrl) nextAvatars.set(entry.userId, entry.avatarUrl);
+            });
+
+            setUsersMap(new Map());
+            setAvatarsByUser(nextAvatars);
+            setFinishedMatches({ ids: new Set(), map: new Map() });
+            setPredictionsByUser(new Map());
+            setBonusByUser(new Map());
+            setLeaderboard(entries);
+            return;
+          }
+        }
+
+        console.warn('[GroupLeaderboard] Falling back to full collection scan', { groupId });
+
         const usersPromise = batchGetUsers(allUserIds);
         const matchesPromise = getDocs(
           query(
@@ -78,7 +131,7 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
           if (!finishedIds.has(prediction.matchId)) return;
 
           const match = finishedMap.get(prediction.matchId);
-          if (!prediction.points && match?.result) {
+          if (match?.result) {
             const calculated = calculatePredictionPoints(prediction, match.result, group.settings);
             prediction.points = calculated.points;
             prediction.pointsBreakdown = calculated.breakdown;
@@ -123,6 +176,7 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
         });
 
         setUsersMap(resolvedUsersMap);
+        setAvatarsByUser(new Map());
         setFinishedMatches({ ids: finishedIds, map: finishedMap });
         setPredictionsByUser(nextPredictionsByUser);
         setBonusByUser(nextBonusByUser);
@@ -144,6 +198,101 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
       cancelled = true;
     };
   }, [groupId, group.competitionId, allUserIds.join(','), group.settings]);
+
+  async function openPointsHistory(entry: GroupLeaderboardEntry) {
+    if (predictionsByUser.has(entry.userId) || bonusByUser.has(entry.userId)) {
+      setSelectedEntry(entry);
+      return;
+    }
+
+    setLoadingHistoryUserId(entry.userId);
+    try {
+      const [matchesSnapshot, predictionsSnapshot, bonusSnapshot] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, 'competitions', group.competitionId, 'matches'),
+            where('status', '==', 'finished')
+          )
+        ),
+        getDocs(
+          query(
+            collection(db, 'groups', groupId, 'predictions'),
+            where('userId', '==', entry.userId)
+          )
+        ),
+        getDocs(
+          query(
+            collection(db, 'groups', groupId, 'bonusPredictions'),
+            where('userId', '==', entry.userId)
+          )
+        )
+      ]);
+
+      const finishedMap = new Map<string, Match>();
+      matchesSnapshot.forEach((doc) => {
+        const match = { id: doc.id, ...doc.data() } as Match;
+        finishedMap.set(match.id, match);
+      });
+
+      const predictions: Prediction[] = [];
+      predictionsSnapshot.forEach((doc) => {
+        const prediction = { id: doc.id, ...doc.data() } as Prediction;
+        const match = finishedMap.get(prediction.matchId);
+        if (!match?.result) return;
+        const calculated = calculatePredictionPoints(prediction, match.result, group.settings);
+        prediction.points = calculated.points;
+        prediction.pointsBreakdown = calculated.breakdown;
+        predictions.push(prediction);
+      });
+
+      let bonus: BonusPrediction | undefined;
+      bonusSnapshot.forEach((doc) => {
+        bonus = { id: doc.id, ...doc.data() } as BonusPrediction;
+      });
+
+      const actualTotal =
+        predictions.reduce((sum, prediction) => sum + (prediction.points ?? 0), 0) +
+        (bonus?.points ?? 0);
+
+      if (actualTotal !== entry.totalPoints) {
+        console.warn('[GroupLeaderboard] Aggregate total is stale; updating row locally', {
+          groupId,
+          userId: entry.userId,
+          aggregateTotal: entry.totalPoints,
+          actualTotal
+        });
+
+        setLeaderboard((prev) => {
+          const next = prev.map((item) =>
+            item.userId === entry.userId ? { ...item, totalPoints: actualTotal } : item
+          );
+          next.sort((a, b) =>
+            b.totalPoints !== a.totalPoints
+              ? b.totalPoints - a.totalPoints
+              : a.userName.localeCompare(b.userName)
+          );
+          next.forEach((item, index) => {
+            item.rank = index + 1;
+          });
+          return next;
+        });
+      }
+
+      setFinishedMatches({ ids: new Set(finishedMap.keys()), map: finishedMap });
+      setPredictionsByUser((prev) => new Map(prev).set(entry.userId, predictions));
+      setBonusByUser((prev) => {
+        const next = new Map(prev);
+        if (bonus) next.set(entry.userId, bonus);
+        return next;
+      });
+      setSelectedEntry(entry);
+    } catch (err) {
+      console.error('[GroupLeaderboard] Error loading points history:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar historial de puntos');
+    } finally {
+      setLoadingHistoryUserId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -217,11 +366,11 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
                   <div className="flex items-center gap-3">
                     <span className="h-9 w-9 shrink-0 flex items-center justify-center rounded-full overflow-hidden bg-[color:var(--pc-main-dark)]/60 text-[color:var(--pc-muted)] font-semibold text-sm">
                       {(() => {
-                        const user = usersMap.get(entry.userId);
-                        if (user?.avatarUrl) {
+                        const avatarUrl = usersMap.get(entry.userId)?.avatarUrl ?? avatarsByUser.get(entry.userId);
+                        if (avatarUrl) {
                           return (
                             <img
-                              src={user.avatarUrl}
+                              src={avatarUrl}
                               alt=""
                               className="w-full h-full object-cover"
                             />
@@ -236,12 +385,13 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
                   <button
                     type="button"
-                    onClick={() => setSelectedEntry(entry)}
-                    className="inline-flex items-center gap-1.5 text-[color:var(--pc-accent)] hover:text-[color:var(--pc-accent-dark)] focus:outline-none focus:ring-2 focus:ring-[color:var(--pc-accent)] focus:ring-offset-1 rounded"
+                    onClick={() => openPointsHistory(entry)}
+                    disabled={loadingHistoryUserId === entry.userId}
+                    className="inline-flex items-center gap-1.5 text-[color:var(--pc-accent)] hover:text-[color:var(--pc-accent-dark)] focus:outline-none focus:ring-2 focus:ring-[color:var(--pc-accent)] focus:ring-offset-1 rounded disabled:opacity-60"
                     title="Ver historial de puntos"
                   >
                     <span className={`font-bold text-lg ${entry.totalPoints > 0 ? 'text-[color:var(--pc-accent)]' : 'text-[color:var(--pc-muted)]'}`}>
-                      {entry.totalPoints}
+                      {loadingHistoryUserId === entry.userId ? '...' : entry.totalPoints}
                     </span>
                   </button>
                 </td>
@@ -256,7 +406,7 @@ export default function GroupLeaderboard({ groupId, group }: GroupLeaderboardPro
           isOpen={!!selectedEntry}
           onClose={() => setSelectedEntry(null)}
           userName={selectedEntry.userName}
-          avatarUrl={usersMap.get(selectedEntry.userId)?.avatarUrl}
+          avatarUrl={usersMap.get(selectedEntry.userId)?.avatarUrl ?? avatarsByUser.get(selectedEntry.userId)}
           predictions={predictionsByUser.get(selectedEntry.userId) ?? []}
           bonus={bonusByUser.get(selectedEntry.userId)}
           matchesMap={finishedMatches.map}
