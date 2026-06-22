@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { httpsCallable } from 'firebase/functions';
 import { getGroup, isGroupAdmin } from '../../lib/groups';
-import { getCurrentUser } from '../../lib/auth';
+import { getCurrentUser, getUserData } from '../../lib/auth';
+import { functions } from '../../lib/firebase';
 import { getRoute } from '../../lib/utils';
 import PredictionsView from './PredictionsView';
 import GroupLeaderboard from './GroupLeaderboard';
@@ -30,6 +32,9 @@ export default function GroupDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userIsAdmin, setUserIsAdmin] = useState(false);
+  const [userIsSuperAdmin, setUserIsSuperAdmin] = useState(false);
+  const [refreshingLeaderboards, setRefreshingLeaderboards] = useState(false);
+  const [leaderboardMessage, setLeaderboardMessage] = useState('');
   const [paramsChecked, setParamsChecked] = useState(false);
 
   useEffect(() => {
@@ -84,10 +89,31 @@ export default function GroupDashboard() {
 
       setGroup(groupData);
       setUserIsAdmin(isGroupAdmin(groupData, user.uid));
+      const userData = await getUserData(user.uid);
+      setUserIsSuperAdmin(userData?.superAdmin === true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar grupo');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefreshLeaderboards = async () => {
+    if (!group) return;
+
+    setRefreshingLeaderboards(true);
+    setLeaderboardMessage('');
+    try {
+      const refreshLeaderboards = httpsCallable<
+        { competitionId: string },
+        { groupsUpdated: number }
+      >(functions, 'refreshLeaderboards');
+      const result = await refreshLeaderboards({ competitionId: group.competitionId });
+      setLeaderboardMessage(`Tablas actualizadas: ${result.data.groupsUpdated} grupos.`);
+    } catch (err: unknown) {
+      setLeaderboardMessage(err instanceof Error ? err.message : 'No se pudieron actualizar las tablas');
+    } finally {
+      setRefreshingLeaderboards(false);
     }
   };
 
@@ -128,9 +154,25 @@ export default function GroupDashboard() {
 
   if (!group) return null;
 
+  const bonusPredictionsHref = (() => {
+    const basePath = getRoute('/groups/dashboard');
+    const params = new URLSearchParams({ groupId, tab: 'predictions', subTab: 'bonus' });
+    return `${basePath}?${params.toString()}`;
+  })();
+
   return (
     <div className="max-w-7xl mx-auto mt-8 p-6 bg-[color:var(--pc-surface)]/40">
       <div className="mb-4 flex justify-end">
+        {userIsSuperAdmin && (
+          <button
+            type="button"
+            onClick={handleRefreshLeaderboards}
+            disabled={refreshingLeaderboards}
+            className="mr-3 inline-flex items-center gap-2 rounded-lg border border-[color:var(--pc-accent)]/60 bg-[color:var(--pc-main)]/30 px-3 py-2 text-sm font-medium text-[color:var(--pc-text-on-dark)] transition hover:border-[color:var(--pc-accent)] disabled:opacity-60"
+          >
+            {refreshingLeaderboards ? 'Actualizando...' : 'Actualizar tablas'}
+          </button>
+        )}
         <a
           href={getRoute('/groups')}
           className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--pc-main-dark)]/60 bg-[color:var(--pc-surface)]/60 px-3 py-2 text-sm font-medium text-[color:var(--pc-muted)] transition hover:border-[color:var(--pc-accent)]/50 hover:text-[color:var(--pc-accent)]"
@@ -139,6 +181,12 @@ export default function GroupDashboard() {
           Volver a mis grupos
         </a>
       </div>
+
+      {leaderboardMessage && (
+        <div className="mb-4 rounded-lg border border-[color:var(--pc-accent)]/50 bg-[color:var(--pc-surface)]/80 px-4 py-3 text-sm text-[color:var(--pc-muted)]">
+          {leaderboardMessage}
+        </div>
+      )}
 
       <div className="mb-6">
         <div className="flex justify-between items-start">
@@ -169,6 +217,30 @@ export default function GroupDashboard() {
               </span>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="mb-5 overflow-hidden rounded-2xl border border-yellow-300/40 bg-gradient-to-r from-yellow-400/20 via-amber-500/15 to-[color:var(--pc-main)]/20 p-4 shadow-lg shadow-black/10 backdrop-blur-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-yellow-300/20 text-2xl ring-1 ring-yellow-200/40">
+            🏆
+          </div>
+          <div className="flex-1">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-yellow-200">
+                No pierdas tus puntos extra
+              </p>
+              <p className="mt-1 text-base font-medium text-[color:var(--pc-text-on-dark)]">
+                Los pronósticos bonus cierran el <span className="font-bold text-[color:var(--pc-accent)]">27/06/2026</span>. Cargalos a tiempo y peleá cada punto desde el arranque.
+              </p>
+            </div>
+          </div>
+          <a
+            href={bonusPredictionsHref}
+            className="inline-flex w-full items-center justify-center rounded-xl bg-[color:var(--pc-accent)] px-4 py-2.5 text-sm font-bold text-slate-950 shadow-md shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto"
+          >
+            Ir a pronósticos bonus
+          </a>
         </div>
       </div>
 

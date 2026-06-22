@@ -118,6 +118,7 @@ export interface User {
   avatarUrl?: string;
   groups: string[];
   canCreateGroups: boolean;
+  superAdmin?: boolean;
   purchasedPlanCode?: string;
   purchasedPlanName?: string;
   purchasedMaxParticipants?: number;
