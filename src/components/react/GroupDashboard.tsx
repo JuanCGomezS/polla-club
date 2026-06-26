@@ -231,7 +231,7 @@ export default function GroupDashboard() {
                 No pierdas tus puntos extra
               </p>
               <p className="mt-1 text-base font-medium text-[color:var(--pc-text-on-dark)]">
-                Los pronósticos bonus cierran el <span className="font-bold text-[color:var(--pc-accent)]">27/06/2026</span>. Cargalos a tiempo y peleá cada punto desde el arranque.
+                Los pronósticos bonus cierran el <span className="font-bold text-[color:var(--pc-accent)]">28/06/2026</span>. Cargalos a tiempo y peleá cada punto desde el arranque.
               </p>
             </div>
           </div>

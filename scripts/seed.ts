@@ -108,7 +108,7 @@ async function seedDatabase() {
     // Fechas: Mundial 2026 (junio-julio 2026)
     const startDate = admin.firestore.Timestamp.fromDate(new Date('2026-06-11T00:00:00Z'));
     const endDate = admin.firestore.Timestamp.fromDate(new Date('2026-07-19T23:59:59Z'));
-    const bonusLockDate = admin.firestore.Timestamp.fromDate(new Date('2026-06-28T00:00:00Z')); // Antes de octavos
+    const bonusLockDate = admin.firestore.Timestamp.fromDate(new Date('2026-06-28T23:59:59Z'));
     
     await competitionRef.set({
       id: competitionId,
